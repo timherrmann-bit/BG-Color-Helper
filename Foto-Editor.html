@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111827" />
   <title>Foto-Editor Zuschneiden</title>
   <style>
     :root {
@@ -44,9 +45,10 @@
 
     .panel { padding: 24px; }
 
-    h1, h2, p { margin: 0; }
+    h1, h2, h3, p { margin: 0; }
     h1 { font-size: 28px; line-height: 1.2; margin-bottom: 8px; }
     h2 { font-size: 20px; line-height: 1.25; margin-bottom: 16px; }
+    h3 { font-size: 14px; line-height: 1.25; margin-bottom: 10px; }
 
     .sub {
       color: var(--muted);
@@ -81,7 +83,7 @@
       font-weight: 500;
     }
 
-    button, .file-label, select { font: inherit; }
+    button, .file-label, select, input { font: inherit; }
 
     .button, .file-label {
       appearance: none;
@@ -98,6 +100,46 @@
       display: inline-block;
     }
 
+    .editor-wrap.dragover {
+      outline: 3px dashed rgba(255,255,255,0.9);
+      outline-offset: -12px;
+      background: #1f2937;
+    }
+
+    .editor-drop-hint {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 32px;
+      text-align: center;
+      color: rgba(255,255,255,0.86);
+      pointer-events: none;
+    }
+
+    .editor-drop-hint__box {
+      border: 2px dashed rgba(255,255,255,0.35);
+      border-radius: 24px;
+      padding: 28px 24px;
+      background: rgba(255,255,255,0.04);
+      max-width: 420px;
+      width: 100%;
+      backdrop-filter: blur(2px);
+    }
+
+    .editor-drop-hint__box strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .editor-drop-hint__box span {
+      display: block;
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.72);
+    }
+
     .button:hover, .file-label:hover { transform: translateY(-1px); }
 
     .button:disabled {
@@ -110,6 +152,15 @@
       background: #fff;
       color: var(--text);
       border: 1px solid var(--border);
+    }
+
+    .button.ghost {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 13px;
     }
 
     .button-grid {
@@ -148,20 +199,63 @@
       accent-color: #111827;
     }
 
-    select {
+    select,
+    input[type="number"] {
       border: 1px solid var(--border);
       background: #fff;
       border-radius: 16px;
       padding: 12px 14px;
       color: var(--text);
+      width: 100%;
     }
 
-    .hint {
+    .inline-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .small-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hint,
+    .info-box {
       background: #f9fafb;
       border-radius: 18px;
       padding: 14px 16px;
       color: var(--muted);
       font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info-box {
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .info-row strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .install-note {
+      font-size: 12px;
+      color: var(--muted);
       line-height: 1.5;
     }
 
@@ -257,7 +351,7 @@
   <div class="app">
     <section class="card panel">
       <h1>Foto-Editor</h1>
-      <p class="sub">Bilder lokal im Browser hochladen, frei positionieren und z. B. als 1:1 Shop-Bild exportieren.</p>
+      <p class="sub">Bilder lokal im Browser hochladen, frei positionieren, zuschneiden und auf Wunsch direkt kleiner rendern.</p>
 
       <div class="stack">
         <div class="field">
@@ -295,13 +389,47 @@
           </select>
         </div>
 
+        <div class="field">
+          <div class="label-row">
+            <span>Qualität</span>
+            <span class="value" id="qualityValue">95%</span>
+          </div>
+          <input id="qualityRange" type="range" min="60" max="100" step="1" value="95">
+        </div>
+
+        <div class="field">
+          <div class="label-row"><span>Ausgabegröße in Pixel</span></div>
+          <div class="inline-grid">
+            <input id="exportWidth" type="number" min="1" step="1" placeholder="Breite">
+            <input id="exportHeight" type="number" min="1" step="1" placeholder="Höhe">
+          </div>
+          <div class="small-actions">
+            <button class="button ghost" id="useOriginalSizeBtn" type="button">Original-Crop übernehmen</button>
+            <button class="button ghost" id="toggleLockBtn" type="button">Verhältnis gesperrt</button>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>Export-Info</h3>
+          <div class="info-list">
+            <div class="info-row"><span>Aktueller Crop</span><strong id="cropSizeInfo">–</strong></div>
+            <div class="info-row"><span>Geplante Ausgabe</span><strong id="outputSizeInfo">–</strong></div>
+            <div class="info-row"><span>Letzter Export</span><strong id="actualFileSizeInfo">–</strong></div>
+          </div>
+        </div>
+
         <div class="button-grid">
           <button class="button" id="exportBtn" disabled>Crop erzeugen</button>
           <button class="button secondary" id="downloadBtn" disabled>Download</button>
         </div>
 
+        <div class="small-actions">
+          <button class="button ghost" id="installAppBtn" type="button">Als App installieren</button>
+        </div>
+        <div class="install-note" id="installNote">Die Seite kann als installierbare Browser-App eingebunden werden, wenn sie über HTTPS gehostet wird und Chrome die Installation anbietet.</div>
+
         <div class="hint">
-          Zoom <strong>0</strong> ist jetzt der kleinste sinnvolle Startwert. Das Bild wird beim Laden automatisch so eingepasst, dass der Crop-Rahmen direkt voll nutzbar ist.
+          Zoom <strong>0</strong> ist der kleinste sinnvolle Startwert. Du kannst danach zusätzlich eine kleinere Ausgabegröße wählen, um Dateigröße und Pixelzahl direkt im Editor zu reduzieren.
         </div>
 
         <div id="status" class="status"></div>
@@ -311,8 +439,14 @@
     <section class="main">
       <div class="card panel">
         <h2>Editor</h2>
-        <div id="editorWrap" class="editor-wrap">
-          <div id="placeholder" class="placeholder">Noch kein Bild geladen.<br>Wähle links eine Datei aus.</div>
+        <div id="editorWrap" class="editor-wrap" tabindex="0" role="button" aria-label="Bild per Drag and Drop oder Klick in den Editor laden">
+          <div id="placeholder" class="placeholder hidden"></div>
+          <div id="editorDropHint" class="editor-drop-hint">
+            <div class="editor-drop-hint__box">
+              <strong>Bild direkt hier hineinziehen</strong>
+              <span>Du kannst dein Bild direkt auf die Editor-Fläche ziehen oder in den Editor klicken, um eine Datei auszuwählen.</span>
+            </div>
+          </div>
           <img id="editorImage" class="editor-image hidden" alt="Bearbeitungsbild">
           <div id="cropBox" class="crop-box hidden"></div>
         </div>
@@ -339,14 +473,26 @@
       ];
 
       const fileInput = document.getElementById('fileInput');
+      const editorDropHint = document.getElementById('editorDropHint');
       const ratioGrid = document.getElementById('ratioGrid');
       const zoomRange = document.getElementById('zoomRange');
       const rotationRange = document.getElementById('rotationRange');
       const zoomValue = document.getElementById('zoomValue');
       const rotationValue = document.getElementById('rotationValue');
       const formatSelect = document.getElementById('formatSelect');
+      const qualityRange = document.getElementById('qualityRange');
+      const qualityValue = document.getElementById('qualityValue');
+      const exportWidthInput = document.getElementById('exportWidth');
+      const exportHeightInput = document.getElementById('exportHeight');
+      const useOriginalSizeBtn = document.getElementById('useOriginalSizeBtn');
+      const toggleLockBtn = document.getElementById('toggleLockBtn');
+      const cropSizeInfo = document.getElementById('cropSizeInfo');
+      const outputSizeInfo = document.getElementById('outputSizeInfo');
+      const actualFileSizeInfo = document.getElementById('actualFileSizeInfo');
       const exportBtn = document.getElementById('exportBtn');
       const downloadBtn = document.getElementById('downloadBtn');
+      const installAppBtn = document.getElementById('installAppBtn');
+      const installNote = document.getElementById('installNote');
       const statusEl = document.getElementById('status');
       const editorWrap = document.getElementById('editorWrap');
       const editorImage = document.getElementById('editorImage');
@@ -369,7 +515,11 @@
         dragStartX: 0,
         dragStartY: 0,
         startX: 0,
-        startY: 0
+        startY: 0,
+        lockAspect: true,
+        lastExportBytes: 0,
+        isUpdatingOutputInputs: false,
+        deferredPrompt: null
       };
 
       function setStatus(message = '', isError = false) {
@@ -384,12 +534,23 @@
         }
       }
 
+      function formatBytes(bytes) {
+        if (!bytes || bytes <= 0) return '–';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+      }
+
       function getCurrentScale() {
         return state.baseScale * (1 + state.zoom);
       }
 
       function updateZoomLabel() {
         zoomValue.textContent = state.zoom.toFixed(2);
+      }
+
+      function updateQualityLabel() {
+        qualityValue.textContent = `${qualityRange.value}%`;
       }
 
       function getRotatedBounds(width, height, angleDeg, scale) {
@@ -400,6 +561,44 @@
           width: (width * cos + height * sin) * scale,
           height: (width * sin + height * cos) * scale
         };
+      }
+
+      function getCurrentCropSourceSize() {
+        if (!state.image) return { width: 0, height: 0 };
+        const cropWDisplay = cropBox.clientWidth;
+        const cropHDisplay = cropBox.clientHeight;
+        const scale = getCurrentScale();
+        return {
+          width: Math.max(1, Math.round(cropWDisplay / scale)),
+          height: Math.max(1, Math.round(cropHDisplay / scale))
+        };
+      }
+
+      function getPlannedOutputSize() {
+        const cropSize = getCurrentCropSourceSize();
+        const width = parseInt(exportWidthInput.value, 10);
+        const height = parseInt(exportHeightInput.value, 10);
+        return {
+          width: Number.isFinite(width) && width > 0 ? width : cropSize.width,
+          height: Number.isFinite(height) && height > 0 ? height : cropSize.height
+        };
+      }
+
+      function refreshInfo() {
+        const cropSize = getCurrentCropSourceSize();
+        const outputSize = getPlannedOutputSize();
+        cropSizeInfo.textContent = cropSize.width && cropSize.height ? `${cropSize.width} × ${cropSize.height}px` : '–';
+        outputSizeInfo.textContent = outputSize.width && outputSize.height ? `${outputSize.width} × ${outputSize.height}px` : '–';
+        actualFileSizeInfo.textContent = state.lastExportBytes ? formatBytes(state.lastExportBytes) : '–';
+      }
+
+      function syncOutputInputsToCrop() {
+        const cropSize = getCurrentCropSourceSize();
+        state.isUpdatingOutputInputs = true;
+        exportWidthInput.value = cropSize.width || '';
+        exportHeightInput.value = cropSize.height || '';
+        state.isUpdatingOutputInputs = false;
+        refreshInfo();
       }
 
       function renderRatioButtons() {
@@ -416,6 +615,7 @@
             calculateBaseScale();
             clampPosition();
             updateImageTransform();
+            syncOutputInputsToCrop();
           });
           ratioGrid.appendChild(btn);
         });
@@ -450,23 +650,14 @@
         if (!state.image) return;
         const boxW = cropBox.clientWidth;
         const boxH = cropBox.clientHeight;
-        state.baseScale = Math.max(
-          boxW / state.image.naturalWidth,
-          boxH / state.image.naturalHeight
-        );
+        state.baseScale = Math.max(boxW / state.image.naturalWidth, boxH / state.image.naturalHeight);
       }
 
       function clampPosition() {
         if (!state.image) return;
         const boxW = cropBox.clientWidth;
         const boxH = cropBox.clientHeight;
-        const bounds = getRotatedBounds(
-          state.image.naturalWidth,
-          state.image.naturalHeight,
-          state.rotation,
-          getCurrentScale()
-        );
-
+        const bounds = getRotatedBounds(state.image.naturalWidth, state.image.naturalHeight, state.rotation, getCurrentScale());
         const maxX = Math.max(0, (bounds.width - boxW) / 2);
         const maxY = Math.max(0, (bounds.height - boxH) / 2);
         state.x = Math.min(maxX, Math.max(-maxX, state.x));
@@ -477,11 +668,32 @@
         editorImage.style.transform = `translate(calc(-50% + ${state.x}px), calc(-50% + ${state.y}px)) scale(${getCurrentScale()}) rotate(${state.rotation}deg)`;
       }
 
+      function updateLockButton() {
+        toggleLockBtn.textContent = state.lockAspect ? 'Verhältnis gesperrt' : 'Verhältnis frei';
+      }
+
+      function updateInstallUi() {
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          installAppBtn.disabled = true;
+          installNote.textContent = 'Die App ist bereits installiert oder läuft schon im App-Modus.';
+          return;
+        }
+
+        if (state.deferredPrompt) {
+          installAppBtn.disabled = false;
+          installNote.textContent = 'Chrome bietet die Installation an. Mit dem Button kannst du den Editor als App anheften.';
+        } else {
+          installAppBtn.disabled = true;
+          installNote.textContent = 'Für die Installation braucht die Seite HTTPS, ein Manifest und einen Service Worker. Auf GitHub Pages ist das möglich.';
+        }
+      }
+
       function resetEditor() {
         state.zoom = 0;
         state.rotation = 0;
         state.x = 0;
         state.y = 0;
+        state.lastExportBytes = 0;
         zoomRange.value = '0';
         rotationRange.value = '0';
         updateZoomLabel();
@@ -490,6 +702,7 @@
         calculateBaseScale();
         clampPosition();
         updateImageTransform();
+        syncOutputInputsToCrop();
       }
 
       function handleLoadedImage(src, fileName) {
@@ -500,6 +713,7 @@
           state.fileName = fileName;
           editorImage.src = src;
           placeholder.classList.add('hidden');
+          editorDropHint.classList.add('hidden');
           editorImage.classList.remove('hidden');
           cropBox.classList.remove('hidden');
           exportBtn.disabled = false;
@@ -512,9 +726,12 @@
         img.src = src;
       }
 
-      fileInput.addEventListener('change', (event) => {
-        const file = event.target.files && event.target.files[0];
+      function loadFile(file) {
         if (!file) return;
+        if (!file.type || !file.type.startsWith('image/')) {
+          setStatus('Bitte nur Bilddateien laden.', true);
+          return;
+        }
 
         clearOutputUrl();
         setStatus('');
@@ -525,6 +742,45 @@
         };
         reader.onerror = () => setStatus('Datei konnte nicht gelesen werden.', true);
         reader.readAsDataURL(file);
+      }
+
+      fileInput.addEventListener('change', (event) => {
+        const file = event.target.files && event.target.files[0];
+        loadFile(file);
+      });
+
+      editorWrap.addEventListener('click', (event) => {
+        if (!state.image || event.target === editorWrap || event.target === placeholder || event.target === editorDropHint || editorDropHint.contains(event.target)) {
+          fileInput.click();
+        }
+      });
+
+      editorWrap.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          fileInput.click();
+        }
+      });
+
+      ['dragenter', 'dragover'].forEach((eventName) => {
+        editorWrap.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          editorWrap.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'dragend', 'drop'].forEach((eventName) => {
+        editorWrap.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          editorWrap.classList.remove('dragover');
+        });
+      });
+
+      editorWrap.addEventListener('drop', (event) => {
+        const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+        loadFile(file);
       });
 
       zoomRange.addEventListener('input', () => {
@@ -532,6 +788,7 @@
         updateZoomLabel();
         clampPosition();
         updateImageTransform();
+        refreshInfo();
       });
 
       rotationRange.addEventListener('input', () => {
@@ -539,6 +796,62 @@
         rotationValue.textContent = state.rotation + '°';
         clampPosition();
         updateImageTransform();
+        refreshInfo();
+      });
+
+      formatSelect.addEventListener('change', refreshInfo);
+      qualityRange.addEventListener('input', () => {
+        updateQualityLabel();
+        refreshInfo();
+      });
+
+      useOriginalSizeBtn.addEventListener('click', () => {
+        syncOutputInputsToCrop();
+      });
+
+      toggleLockBtn.addEventListener('click', () => {
+        state.lockAspect = !state.lockAspect;
+        updateLockButton();
+      });
+
+      exportWidthInput.addEventListener('input', () => {
+        if (state.isUpdatingOutputInputs) return;
+        if (!state.lockAspect) {
+          refreshInfo();
+          return;
+        }
+
+        const cropSize = getCurrentCropSourceSize();
+        const width = parseInt(exportWidthInput.value, 10);
+        if (!Number.isFinite(width) || width <= 0 || !cropSize.width || !cropSize.height) {
+          refreshInfo();
+          return;
+        }
+
+        state.isUpdatingOutputInputs = true;
+        exportHeightInput.value = Math.max(1, Math.round(width / cropSize.width * cropSize.height));
+        state.isUpdatingOutputInputs = false;
+        refreshInfo();
+      });
+
+      exportHeightInput.addEventListener('input', () => {
+        if (state.isUpdatingOutputInputs) return;
+        if (!state.lockAspect) {
+          refreshInfo();
+          return;
+        }
+
+        const cropSize = getCurrentCropSourceSize();
+        const height = parseInt(exportHeightInput.value, 10);
+        if (!Number.isFinite(height) || height <= 0 || !cropSize.width || !cropSize.height) {
+          refreshInfo();
+          return;
+        }
+
+        state.isUpdatingOutputInputs = true;
+        exportWidthInput.value = Math.max(1, Math.round(height / cropSize.height * cropSize.width));
+        state.isUpdatingOutputInputs = false;
+        refreshInfo();
       });
 
       function startDrag(clientX, clientY) {
@@ -557,6 +870,7 @@
         state.y = state.startY + (clientY - state.dragStartY);
         clampPosition();
         updateImageTransform();
+        refreshInfo();
       }
 
       function endDrag() {
@@ -585,6 +899,7 @@
         calculateBaseScale();
         clampPosition();
         updateImageTransform();
+        refreshInfo();
       });
 
       exportBtn.addEventListener('click', () => {
@@ -605,6 +920,7 @@
         const safeSourceX = Math.max(0, Math.min(state.image.naturalWidth - sourceW, sourceX));
         const safeSourceY = Math.max(0, Math.min(state.image.naturalHeight - sourceH, sourceY));
 
+        const plannedOutput = getPlannedOutputSize();
         const outputCanvas = document.createElement('canvas');
         const outputCtx = outputCanvas.getContext('2d');
         if (!outputCtx) {
@@ -612,8 +928,10 @@
           return;
         }
 
-        outputCanvas.width = Math.round(sourceW);
-        outputCanvas.height = Math.round(sourceH);
+        outputCanvas.width = Math.max(1, plannedOutput.width);
+        outputCanvas.height = Math.max(1, plannedOutput.height);
+        outputCtx.imageSmoothingEnabled = true;
+        outputCtx.imageSmoothingQuality = 'high';
 
         if (state.rotation !== 0) {
           const angle = state.rotation * Math.PI / 180;
@@ -642,35 +960,13 @@
           const rotatedSourceX = (tempCanvas.width / 2) - (rotatedSourceW / 2 + state.x / rotatedScale);
           const rotatedSourceY = (tempCanvas.height / 2) - (rotatedSourceH / 2 + state.y / rotatedScale);
 
-          outputCanvas.width = Math.round(rotatedSourceW);
-          outputCanvas.height = Math.round(rotatedSourceH);
-          outputCtx.drawImage(
-            tempCanvas,
-            rotatedSourceX,
-            rotatedSourceY,
-            rotatedSourceW,
-            rotatedSourceH,
-            0,
-            0,
-            outputCanvas.width,
-            outputCanvas.height
-          );
+          outputCtx.drawImage(tempCanvas, rotatedSourceX, rotatedSourceY, rotatedSourceW, rotatedSourceH, 0, 0, outputCanvas.width, outputCanvas.height);
         } else {
-          outputCtx.drawImage(
-            state.image,
-            safeSourceX,
-            safeSourceY,
-            sourceW,
-            sourceH,
-            0,
-            0,
-            outputCanvas.width,
-            outputCanvas.height
-          );
+          outputCtx.drawImage(state.image, safeSourceX, safeSourceY, sourceW, sourceH, 0, 0, outputCanvas.width, outputCanvas.height);
         }
 
         const format = formatSelect.value;
-        const quality = format === 'image/png' ? undefined : 0.95;
+        const quality = format === 'image/png' ? undefined : Number(qualityRange.value) / 100;
         outputCanvas.toBlob((blob) => {
           if (!blob) {
             setStatus('Export fehlgeschlagen.', true);
@@ -678,13 +974,16 @@
           }
 
           state.outputUrl = URL.createObjectURL(blob);
+          state.lastExportBytes = blob.size;
+
           const img = document.createElement('img');
           img.src = state.outputUrl;
           img.alt = 'Exportierte Vorschau';
           previewArea.innerHTML = '';
           previewArea.appendChild(img);
           downloadBtn.disabled = false;
-          setStatus(`Crop erfolgreich erzeugt (${outputCanvas.width} × ${outputCanvas.height}px).`);
+          refreshInfo();
+          setStatus(`Crop erfolgreich erzeugt (${outputCanvas.width} × ${outputCanvas.height}px, ${formatBytes(blob.size)}).`);
         }, format, quality);
       });
 
@@ -693,17 +992,50 @@
         const ext = formatSelect.value === 'image/jpeg' ? 'jpg' : formatSelect.value === 'image/webp' ? 'webp' : 'png';
         const link = document.createElement('a');
         link.href = state.outputUrl;
-        link.download = `${state.fileName}-${state.aspect === 1 ? '1x1' : 'crop'}.${ext}`;
+        const planned = getPlannedOutputSize();
+        link.download = `${state.fileName}-${state.aspect === 1 ? '1x1' : 'crop'}-${planned.width}x${planned.height}.${ext}`;
         document.body.appendChild(link);
         link.click();
         link.remove();
       });
 
+      installAppBtn.addEventListener('click', async () => {
+        if (!state.deferredPrompt) {
+          setStatus('Die Installation ist aktuell nicht verfügbar. Hoste die Seite über HTTPS, damit Chrome sie als App anbieten kann.', true);
+          return;
+        }
+
+        state.deferredPrompt.prompt();
+        const choice = await state.deferredPrompt.userChoice;
+        state.deferredPrompt = null;
+        updateInstallUi();
+        if (choice.outcome === 'accepted') {
+          setStatus('App-Installation gestartet.');
+        }
+      });
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        state.deferredPrompt = event;
+        updateInstallUi();
+      });
+
+      window.addEventListener('appinstalled', () => {
+        state.deferredPrompt = null;
+        updateInstallUi();
+        setStatus('Die App wurde installiert.');
+      });
+
       renderRatioButtons();
       updateCropBox();
       updateZoomLabel();
+      updateQualityLabel();
+      updateLockButton();
+      refreshInfo();
+      updateInstallUi();
     })();
   </script>
 </body>
 </html>
+
 
