@@ -1,0 +1,350 @@
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import Cropper from "react-easy-crop";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Upload, Download, Crop as CropIcon, RotateCw, Image as ImageIcon } from "lucide-react";
+
+const ASPECT_OPTIONS = [
+  { label: "Frei", value: null },
+  { label: "1:1 Shop", value: 1 / 1 },
+  { label: "4:5 Social", value: 4 / 5 },
+  { label: "16:9 Banner", value: 16 / 9 },
+  { label: "3:4 Portrait", value: 3 / 4 },
+  { label: "9:16 Story", value: 9 / 16 },
+];
+
+function createImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image));
+    image.addEventListener("error", (error) => reject(error));
+    image.setAttribute("crossOrigin", "anonymous");
+    image.src = url;
+  });
+}
+
+async function getCroppedImg(imageSrc, pixelCrop, rotation = 0, fileType = "image/png", quality = 0.92) {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) throw new Error("Canvas konnte nicht erstellt werden.");
+
+  const rotRad = (rotation * Math.PI) / 180;
+
+  const sin = Math.abs(Math.sin(rotRad));
+  const cos = Math.abs(Math.cos(rotRad));
+  const bBoxWidth = image.width * cos + image.height * sin;
+  const bBoxHeight = image.width * sin + image.height * cos;
+
+  canvas.width = bBoxWidth;
+  canvas.height = bBoxHeight;
+
+  ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
+  ctx.rotate(rotRad);
+  ctx.translate(-image.width / 2, -image.height / 2);
+  ctx.drawImage(image, 0, 0);
+
+  const croppedCanvas = document.createElement("canvas");
+  const croppedCtx = croppedCanvas.getContext("2d");
+
+  if (!croppedCtx) throw new Error("Crop-Canvas konnte nicht erstellt werden.");
+
+  croppedCanvas.width = pixelCrop.width;
+  croppedCanvas.height = pixelCrop.height;
+
+  croppedCtx.drawImage(
+    canvas,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  );
+
+  return new Promise((resolve, reject) => {
+    croppedCanvas.toBlob(
+      (file) => {
+        if (!file) {
+          reject(new Error("Export fehlgeschlagen."));
+          return;
+        }
+        resolve({
+          blob: file,
+          url: URL.createObjectURL(file),
+        });
+      },
+      fileType,
+      quality
+    );
+  });
+}
+
+export default function FotoEditor() {
+  const inputRef = useRef(null);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [fileName, setFileName] = useState("bild");
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [aspect, setAspect] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [resultUrl, setResultUrl] = useState(null);
+  const [exportFormat, setExportFormat] = useState("image/png");
+  const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState("");
+
+  const exportExtension = useMemo(() => {
+    return exportFormat === "image/jpeg" ? "jpg" : "png";
+  }, [exportFormat]);
+
+  const onCropComplete = useCallback((_, croppedAreaPixelsValue) => {
+    setCroppedAreaPixels(croppedAreaPixelsValue);
+  }, []);
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (resultUrl) URL.revokeObjectURL(resultUrl);
+    setError("");
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSrc(reader.result?.toString() || null);
+      setFileName(file.name.replace(/\.[^/.]+$/, "") || "bild");
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setRotation(0);
+      setResultUrl(null);
+    };
+    reader.onerror = () => setError("Datei konnte nicht geladen werden.");
+    reader.readAsDataURL(file);
+  };
+
+  const handleExport = async () => {
+    if (!imageSrc || !croppedAreaPixels) return;
+
+    try {
+      setIsExporting(true);
+      setError("");
+      if (resultUrl) URL.revokeObjectURL(resultUrl);
+
+      const result = await getCroppedImg(imageSrc, croppedAreaPixels, rotation, exportFormat, 0.95);
+      setResultUrl(result.url);
+    } catch (err) {
+      setError("Beim Export ist etwas schiefgelaufen.");
+      console.error(err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const triggerUpload = () => inputRef.current?.click();
+
+  const downloadResult = () => {
+    if (!resultUrl) return;
+    const link = document.createElement("a");
+    link.href = resultUrl;
+    link.download = `${fileName}-${aspect === 1 ? "1x1" : "crop"}.${exportExtension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-6 md:p-10">
+      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[380px_1fr]">
+        <Card className="rounded-3xl border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <CropIcon className="h-6 w-6" />
+              Foto-Editor
+            </CardTitle>
+            <p className="text-sm text-slate-600">
+              Bilder hochladen, Seitenverhältnis wählen, zuschneiden und direkt als Shop-Bild exportieren.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            <Button onClick={triggerUpload} className="w-full rounded-2xl">
+              <Upload className="mr-2 h-4 w-4" />
+              Bild hochladen
+            </Button>
+
+            <div className="space-y-3">
+              <div>
+                <p className="mb-2 text-sm font-medium text-slate-800">Seitenverhältnis</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {ASPECT_OPTIONS.map((option) => {
+                    const active = aspect === option.value;
+                    return (
+                      <button
+                        key={option.label}
+                        type="button"
+                        onClick={() => setAspect(option.value)}
+                        className={`rounded-2xl border px-3 py-2 text-sm transition ${
+                          active
+                            ? "border-slate-900 bg-slate-900 text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-medium text-slate-800">Zoom</span>
+                  <span className="text-slate-500">{zoom.toFixed(1)}x</span>
+                </div>
+                <Slider
+                  value={[zoom]}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  onValueChange={(value) => setZoom(value[0])}
+                />
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-medium text-slate-800">Rotation</span>
+                  <span className="text-slate-500">{rotation}°</span>
+                </div>
+                <Slider
+                  value={[rotation]}
+                  min={0}
+                  max={360}
+                  step={1}
+                  onValueChange={(value) => setRotation(value[0])}
+                />
+              </div>
+
+              <div>
+                <p className="mb-2 text-sm font-medium text-slate-800">Export</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setExportFormat("image/png")}
+                    className={`rounded-2xl border px-3 py-2 text-sm transition ${
+                      exportFormat === "image/png"
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-white text-slate-700"
+                    }`}
+                  >
+                    PNG
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExportFormat("image/jpeg")}
+                    className={`rounded-2xl border px-3 py-2 text-sm transition ${
+                      exportFormat === "image/jpeg"
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-white text-slate-700"
+                    }`}
+                  >
+                    JPG
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button
+                onClick={handleExport}
+                disabled={!imageSrc || isExporting}
+                className="rounded-2xl"
+              >
+                <RotateCw className="mr-2 h-4 w-4" />
+                {isExporting ? "Export läuft..." : "Crop erzeugen"}
+              </Button>
+              <Button
+                onClick={downloadResult}
+                disabled={!resultUrl}
+                variant="outline"
+                className="rounded-2xl"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download
+              </Button>
+            </div>
+
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+            <div className="rounded-2xl bg-slate-100 p-4 text-sm text-slate-600">
+              Ideal für deinen Fall: Social-Media-Bild hochladen, auf <strong>1:1 Shop</strong> stellen,
+              Motiv mittig ziehen und als neues quadratisches Bild exportieren.
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6">
+          <Card className="rounded-3xl border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl">Editor</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="relative h-[520px] overflow-hidden rounded-3xl bg-slate-900">
+                {imageSrc ? (
+                  <Cropper
+                    image={imageSrc}
+                    crop={crop}
+                    zoom={zoom}
+                    rotation={rotation}
+                    aspect={aspect || undefined}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onRotationChange={setRotation}
+                    onCropComplete={onCropComplete}
+                    showGrid
+                    objectFit="contain"
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center gap-3 text-slate-300">
+                    <ImageIcon className="h-12 w-12" />
+                    <p className="text-base">Noch kein Bild hochgeladen</p>
+                    <p className="text-sm text-slate-400">Lade links ein Bild hoch und starte direkt mit dem Zuschnitt.</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl">Vorschau</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex min-h-[260px] items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white p-4">
+                {resultUrl ? (
+                  <img
+                    src={resultUrl}
+                    alt="Crop Vorschau"
+                    className="max-h-[420px] w-auto rounded-2xl object-contain"
+                  />
+                ) : (
+                  <p className="text-sm text-slate-500">Nach dem Klick auf „Crop erzeugen“ erscheint hier deine exportierbare Vorschau.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
