@@ -8,1599 +8,763 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
-/* ============================================================
-   CSS VARIABLEN & RESET
-   ============================================================ */
 :root {
-  --cream:        #FBF5EC;
-  --cream-dark:   #F2E8D9;
-  --gold:         #C9A961;
-  --gold-light:   #D4B97A;
-  --gold-dark:    #A88840;
-  --brown:        #8B6F47;
-  --brown-dark:   #5C4730;
-  --brown-light:  #B08B61;
-  --text:         #2C1F0E;
-  --text-muted:   #7A6348;
-  --border:       #DDD0BC;
-  --shadow:       rgba(139, 111, 71, 0.15);
+  --cream:       #FBF5EC;
+  --cream-dark:  #F2E8D9;
+  --gold:        #C9A961;
+  --gold-light:  #D4B97A;
+  --gold-dark:   #A88840;
+  --brown:       #8B6F47;
+  --brown-dark:  #5C4730;
+  --brown-light: #B08B61;
+  --text:        #2C1F0E;
+  --text-muted:  #7A6348;
+  --border:      #DDD0BC;
+  --shadow:      rgba(139,111,71,0.15);
+  --radius:      12px;
+  --radius-sm:   8px;
+  --radius-lg:   18px;
+  --tr:          0.2s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;line-height:1.6}
 
-  --cat-new:      #4CAF50;
-  --cat-changed:  #2196F3;
-  --cat-fixes:    #FF9800;
-  --cat-breaking: #F44336;
-  --cat-known:    #9E9E9E;
+/* ── HEADER ── */
+#app-header{background:linear-gradient(135deg,var(--brown-dark) 0%,var(--brown) 60%,var(--brown-light) 100%);position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(44,31,14,.25)}
+.header-inner{max-width:920px;margin:0 auto;padding:18px 24px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.header-brand{flex:1;min-width:180px}
+.header-brand h1{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--cream);line-height:1.2}
+.version-badge{display:inline-block;background:rgba(201,169,97,.3);border:1px solid var(--gold-light);color:var(--gold-light);font-size:.75rem;font-weight:600;padding:2px 10px;border-radius:20px;margin-top:4px;letter-spacing:.04em}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
-  --radius:       12px;
-  --radius-sm:    8px;
-  --radius-lg:    18px;
-  --transition:   0.22s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;border:none;transition:all var(--tr);text-decoration:none;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--gold);color:var(--brown-dark);font-weight:600}
+.btn-primary:hover{background:var(--gold-light);box-shadow:0 4px 16px rgba(201,169,97,.4)}
+.btn-ghost{background:rgba(255,255,255,.12);color:var(--cream);border:1px solid rgba(255,255,255,.2)}
+.btn-ghost:hover{background:rgba(255,255,255,.22)}
+.btn-outline{background:transparent;color:var(--brown);border:1.5px solid var(--border)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold-dark);background:rgba(201,169,97,.06)}
+.btn-danger{background:transparent;color:#c0392b;border:1.5px solid #e8b0ab}
+.btn-danger:hover{background:#fdf0f0;border-color:#F44336}
+.btn-success{background:#4CAF50;color:#fff}
+.btn-success:hover{background:#43a047;box-shadow:0 4px 14px rgba(76,175,80,.3)}
+.btn-sm{padding:6px 12px;font-size:.8rem}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── MAIN ── */
+#main{max-width:920px;margin:0 auto;padding:28px 24px 80px}
 
-html { font-size: 16px; scroll-behavior: smooth; }
+/* ── SEARCH ── */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+.search-input{width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:#fff;color:var(--text);transition:border var(--tr),box-shadow var(--tr)}
+.search-input::placeholder{color:var(--text-muted)}
+.search-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,97,.18)}
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.6;
-}
+/* ── FILTER CHIPS ── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center}
+.filter-label{font-size:.78rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:.78rem;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all var(--tr);user-select:none}
+.chip input{display:none}
+.chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.chip[data-cat="Neu"]             {border-color:#a8d5a9;background:#f0faf0;color:#2e7d32}
+.chip[data-cat="Geändert"]        {border-color:#90c4f5;background:#e8f4fd;color:#1565c0}
+.chip[data-cat="Fixes"]           {border-color:#ffcc80;background:#fff8e1;color:#e65100}
+.chip[data-cat="Breaking Changes"]{border-color:#ef9a9a;background:#fff5f5;color:#b71c1c}
+.chip[data-cat="Known Issues"]    {border-color:#e0e0e0;background:#f5f5f5;color:#424242}
+.chip.off{opacity:.38}
 
-/* ============================================================
-   HEADER
-   ============================================================ */
-#app-header {
-  background: linear-gradient(135deg, var(--brown-dark) 0%, var(--brown) 60%, var(--brown-light) 100%);
-  color: var(--cream);
-  padding: 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 24px rgba(44, 31, 14, 0.25);
-}
+/* ── FORM PANEL ── */
+#form-panel{display:none;margin-bottom:28px;animation:slideDown .25s ease both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.form-card{background:#fff;border:2px solid var(--gold);border-radius:var(--radius-lg);padding:24px 26px 22px;box-shadow:0 6px 28px rgba(139,111,71,.13)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.panel-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown-dark);display:flex;align-items:center;gap:8px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:540px){.form-row{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:5px}
+label.fld{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+input[type="text"],input[type="date"],select{padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--text);background:var(--cream);transition:border var(--tr),box-shadow var(--tr)}
+input[type="text"]:focus,input[type="date"]:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,97,.2);background:#fff}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath fill='%238B6F47' d='M0.5 0.5l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:32px}
 
-.header-inner {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px 24px 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
+/* ── ITEMS EDITOR ── */
+.items-editor{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.item-row{display:flex;gap:8px;align-items:center;background:var(--cream);border-radius:var(--radius-sm);padding:7px 9px;border:1px solid var(--border);animation:rowIn .18s ease both}
+@keyframes rowIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}
+.item-row select{flex:0 0 155px}
+.item-row input{flex:1;min-width:0}
+.btn-rm{flex-shrink:0;width:32px;height:32px;border-radius:6px;background:#fff;border:1.5px solid #e8b0ab;color:#c0392b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all var(--tr);padding:0;font-family:inherit}
+.btn-rm:hover{background:#fdf0f0}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;padding-top:4px}
 
-.header-brand {
-  flex: 1;
-  min-width: 200px;
-}
+/* ── VERSION CARDS ── */
+.entries-list{display:flex;flex-direction:column;gap:18px}
+.v-card{background:#fff;border-radius:var(--radius-lg);border:1.5px solid var(--border);overflow:hidden;transition:box-shadow var(--tr),transform var(--tr);animation:cardIn .28s ease both}
+.v-card:hover{box-shadow:0 8px 32px var(--shadow);transform:translateY(-2px)}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.v-card-head{display:flex;align-items:center;gap:12px;padding:16px 20px 14px;background:linear-gradient(135deg,var(--cream-dark),var(--cream));border-bottom:1px solid var(--border);flex-wrap:wrap}
+.v-tag{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--brown-dark);letter-spacing:-.02em}
+.v-date{font-size:.8rem;color:var(--text-muted)}
+.v-card-actions{margin-left:auto;display:flex;gap:6px}
+.v-card-body{padding:16px 20px 18px}
+.cat-block+.cat-block{margin-top:12px}
+.cat-label{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 9px;border-radius:20px;margin-bottom:7px}
+.cat-dot{width:6px;height:6px;border-radius:50%}
+.item-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.item-list li{font-size:.88rem;padding:4px 0 4px 16px;position:relative;border-bottom:1px dashed rgba(0,0,0,.05)}
+.item-list li:last-child{border-bottom:none}
+.item-list li::before{content:'';position:absolute;left:3px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
 
-.header-brand h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.55rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--cream);
-  line-height: 1.2;
-}
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state .icon{font-size:2.8rem;margin-bottom:10px}
+.empty-state p{font-size:1rem;margin-bottom:5px;color:var(--text)}
+.empty-state small{font-size:.83rem}
 
-.header-brand .version-badge {
-  display: inline-block;
-  background: rgba(201, 169, 97, 0.35);
-  border: 1px solid var(--gold-light);
-  color: var(--gold-light);
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 2px 10px;
-  border-radius: 20px;
-  margin-top: 5px;
-  letter-spacing: 0.04em;
-}
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(44,31,14,.5);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .2s ease;padding:20px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:var(--radius-lg);padding:30px;max-width:400px;width:100%;box-shadow:0 24px 60px rgba(44,31,14,.2);animation:modalIn .28s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes modalIn{from{opacity:0;transform:scale(.93) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--brown-dark);margin-bottom:8px}
+.modal p{color:var(--text-muted);font-size:.88rem;margin-bottom:22px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
 
-.header-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:24px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--brown-dark);color:var(--cream);padding:11px 18px;border-radius:var(--radius);font-size:.86rem;font-weight:500;box-shadow:0 8px 28px rgba(44,31,14,.28);animation:tIn .3s cubic-bezier(.175,.885,.32,1.275) both;display:flex;align-items:center;gap:9px;pointer-events:all;max-width:300px}
+.toast.success{border-left:4px solid #4CAF50}
+.toast.error  {border-left:4px solid #F44336}
+.toast.info   {border-left:4px solid var(--gold)}
+@keyframes tIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tOut{to{opacity:0;transform:translateX(24px);max-height:0;padding:0;margin:0}}
+.toast.out{animation:tOut .28s ease forwards}
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all var(--transition);
-  text-decoration: none;
-  white-space: nowrap;
-  position: relative;
-  overflow: hidden;
-}
-.btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0);
-  transition: background var(--transition);
-}
-.btn:hover::after { background: rgba(255,255,255,0.08); }
-.btn:active { transform: scale(0.97); }
+/* ── CONFETTI ── */
+.cfp{position:fixed;top:-12px;pointer-events:none;z-index:9999;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
 
-.btn-primary {
-  background: var(--gold);
-  color: var(--brown-dark);
-  font-weight: 600;
-}
-.btn-primary:hover { background: var(--gold-light); box-shadow: 0 4px 16px rgba(201,169,97,0.4); }
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:12px}
+.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:sp .65s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading p{color:var(--text-muted);font-size:.88rem}
 
-.btn-ghost {
-  background: rgba(255,255,255,0.12);
-  color: var(--cream);
-  border: 1px solid rgba(255,255,255,0.2);
-}
-.btn-ghost:hover { background: rgba(255,255,255,0.2); }
+/* ── MISC ── */
+mark.hl{background:rgba(201,169,97,.28);border-radius:2px;padding:0 1px;color:inherit}
 
-.btn-outline {
-  background: transparent;
-  color: var(--brown);
-  border: 1.5px solid var(--border);
-}
-.btn-outline:hover { border-color: var(--gold); color: var(--gold-dark); background: rgba(201,169,97,0.06); }
-
-.btn-danger {
-  background: transparent;
-  color: #c0392b;
-  border: 1.5px solid #e8b0ab;
-}
-.btn-danger:hover { background: #fdf0f0; border-color: #F44336; }
-
-.btn-success {
-  background: #4CAF50;
-  color: #fff;
-}
-.btn-success:hover { background: #43a047; box-shadow: 0 4px 14px rgba(76,175,80,0.3); }
-
-.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-.btn-icon { padding: 8px 10px; }
-
-/* ============================================================
-   MAIN LAYOUT
-   ============================================================ */
-#main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 32px 24px 80px;
-}
-
-/* ============================================================
-   VIEW MODE: SEARCH + FILTER BAR
-   ============================================================ */
-.search-bar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.search-input-wrap {
-  flex: 1;
-  min-width: 200px;
-  position: relative;
-}
-.search-input-wrap svg {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  pointer-events: none;
-}
-.search-input {
-  width: 100%;
-  padding: 11px 14px 11px 42px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  background: #fff;
-  color: var(--text);
-  transition: border var(--transition), box-shadow var(--transition);
-}
-.search-input::placeholder { color: var(--text-muted); }
-.search-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,97,0.18); }
-
-.filter-bar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 28px;
-  align-items: center;
-}
-.filter-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-right: 4px;
-}
-.filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: all var(--transition);
-  user-select: none;
-}
-.filter-chip input[type="checkbox"] { display: none; }
-.filter-chip .dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.filter-chip[data-cat="Neu"]             { border-color: #a8d5a9; background: #f0faf0; color: #2e7d32; }
-.filter-chip[data-cat="Geändert"]        { border-color: #90c4f5; background: #e8f4fd; color: #1565c0; }
-.filter-chip[data-cat="Fixes"]           { border-color: #ffcc80; background: #fff8e1; color: #e65100; }
-.filter-chip[data-cat="Breaking Changes"]{ border-color: #ef9a9a; background: #fff5f5; color: #b71c1c; }
-.filter-chip[data-cat="Known Issues"]    { border-color: #e0e0e0; background: #f5f5f5; color: #424242; }
-.filter-chip.active { opacity: 1; }
-.filter-chip.inactive { opacity: 0.4; }
-
-/* ============================================================
-   VERSION CARDS
-   ============================================================ */
-.entries-list { display: flex; flex-direction: column; gap: 20px; }
-
-.version-card {
-  background: #fff;
-  border-radius: var(--radius-lg);
-  border: 1.5px solid var(--border);
-  overflow: hidden;
-  transition: box-shadow var(--transition), transform var(--transition);
-  animation: cardIn 0.3s ease both;
-}
-.version-card:hover {
-  box-shadow: 0 8px 32px var(--shadow);
-  transform: translateY(-2px);
-}
-
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.version-card-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 22px 16px;
-  background: linear-gradient(135deg, var(--cream-dark) 0%, var(--cream) 100%);
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.version-tag {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--brown-dark);
-  letter-spacing: -0.02em;
-}
-.version-date {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-.version-card-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 6px;
-}
-
-.version-card-body { padding: 18px 22px 20px; }
-
-.items-by-category + .items-by-category { margin-top: 14px; }
-
-.cat-group-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 3px 10px;
-  border-radius: 20px;
-  margin-bottom: 8px;
-}
-.cat-dot { width: 7px; height: 7px; border-radius: 50%; }
-
-.cat-label-Neu             { background: #e8f5e9; color: #2e7d32; }
-.cat-label-Geändert        { background: #e3f2fd; color: #1565c0; }
-.cat-label-Fixes           { background: #fff3e0; color: #e65100; }
-.cat-label-Breaking\ Changes { background: #ffebee; color: #b71c1c; }
-.cat-label-Known\ Issues   { background: #f5f5f5; color: #424242; }
-
-.cat-dot-Neu              { background: var(--cat-new); }
-.cat-dot-Geändert         { background: var(--cat-changed); }
-.cat-dot-Fixes            { background: var(--cat-fixes); }
-.cat-dot-Breaking\ Changes{ background: var(--cat-breaking); }
-.cat-dot-Known\ Issues    { background: var(--cat-known); }
-
-.item-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-.item-list li {
-  font-size: 0.9rem;
-  color: var(--text);
-  padding: 5px 0 5px 18px;
-  position: relative;
-  border-bottom: 1px dashed rgba(0,0,0,0.05);
-}
-.item-list li:last-child { border-bottom: none; }
-.item-list li::before {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 13px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--gold);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-}
-.empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
-.empty-state p { font-size: 1.05rem; margin-bottom: 6px; color: var(--text); }
-.empty-state small { font-size: 0.85rem; }
-
-/* ============================================================
-   EDIT MODE
-   ============================================================ */
-#edit-mode { display: none; }
-
-.edit-section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
-  color: var(--brown-dark);
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--gold);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.form-card {
-  background: #fff;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 28px 28px 24px;
-  margin-bottom: 36px;
-  box-shadow: 0 4px 20px rgba(139,111,71,0.08);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-@media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
-
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group.full { grid-column: 1 / -1; }
-
-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-input[type="text"],
-input[type="date"],
-select,
-textarea {
-  padding: 10px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  color: var(--text);
-  background: var(--cream);
-  transition: border var(--transition), box-shadow var(--transition);
-}
-input[type="text"]:focus,
-input[type="date"]:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201,169,97,0.2);
-  background: #fff;
-}
-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238B6F47' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
-
-/* Items in edit form */
-.items-editor { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-
-.item-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  background: var(--cream);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  animation: itemIn 0.2s ease both;
-}
-@keyframes itemIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-.item-row select { flex: 0 0 160px; }
-.item-row input  { flex: 1; }
-.item-row .btn-remove {
-  flex-shrink: 0;
-  width: 34px; height: 34px;
-  border-radius: 6px;
-  background: #fff;
-  border: 1.5px solid #e8b0ab;
-  color: #c0392b;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem;
-  transition: all var(--transition);
-}
-.item-row .btn-remove:hover { background: #fdf0f0; }
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 6px;
-}
-
-/* Existing versions list in edit mode */
-.existing-list { display: flex; flex-direction: column; gap: 12px; }
-
-.existing-item {
-  background: #fff;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 18px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  transition: box-shadow var(--transition);
-}
-.existing-item:hover { box-shadow: 0 4px 16px var(--shadow); }
-
-.existing-meta { flex: 1; }
-.existing-meta strong {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.05rem;
-  color: var(--brown-dark);
-}
-.existing-meta span {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-.existing-actions { display: flex; gap: 8px; }
-
-/* ============================================================
-   TOAST NOTIFICATIONS
-   ============================================================ */
-#toast-container {
-  position: fixed;
-  bottom: 28px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  pointer-events: none;
-}
-.toast {
-  background: var(--brown-dark);
-  color: var(--cream);
-  padding: 12px 20px;
-  border-radius: var(--radius);
-  font-size: 0.88rem;
-  font-weight: 500;
-  box-shadow: 0 8px 28px rgba(44,31,14,0.3);
-  animation: toastIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  pointer-events: all;
-  max-width: 320px;
-}
-.toast.success { border-left: 4px solid var(--cat-new); }
-.toast.error   { border-left: 4px solid var(--cat-breaking); }
-.toast.info    { border-left: 4px solid var(--gold); }
-
-@keyframes toastIn {
-  from { opacity: 0; transform: translateX(30px) scale(0.95); }
-  to   { opacity: 1; transform: translateX(0) scale(1); }
-}
-@keyframes toastOut {
-  from { opacity: 1; transform: translateX(0); max-height: 80px; }
-  to   { opacity: 0; transform: translateX(30px); max-height: 0; }
-}
-.toast.removing { animation: toastOut 0.3s ease forwards; }
-
-/* ============================================================
-   KONFETTI
-   ============================================================ */
-.confetti-piece {
-  position: fixed;
-  width: 10px; height: 10px;
-  top: -10px;
-  pointer-events: none;
-  z-index: 9999;
-  border-radius: 2px;
-  animation: confettiFall linear forwards;
-}
-@keyframes confettiFall {
-  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-}
-
-/* ============================================================
-   MODAL (Bestätigung Löschen)
-   ============================================================ */
-.modal-backdrop {
-  position: fixed; inset: 0;
-  background: rgba(44, 31, 14, 0.5);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
-  padding: 20px;
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.modal {
-  background: #fff;
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 24px 60px rgba(44,31,14,0.2);
-  animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.92) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.modal h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem;
-  color: var(--brown-dark);
-  margin-bottom: 10px;
-}
-.modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
-.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
-
-/* ============================================================
-   MODE TABS
-   ============================================================ */
-.mode-tabs {
-  display: flex;
-  background: rgba(255,255,255,0.15);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 2px;
-}
-.mode-tab {
-  padding: 7px 16px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  color: rgba(251,245,236,0.7);
-  transition: all var(--transition);
-  font-family: 'DM Sans', sans-serif;
-}
-.mode-tab.active {
-  background: rgba(255,255,255,0.2);
-  color: var(--cream);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-.mode-tab:hover:not(.active) { color: var(--cream); }
-
-/* ============================================================
-   DIVIDER
-   ============================================================ */
-.section-divider {
-  border: none;
-  border-top: 1.5px dashed var(--border);
-  margin: 32px 0;
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 600px) {
-  .header-inner { padding: 16px; gap: 12px; }
-  #main { padding: 20px 16px 60px; }
-  .version-card-header { padding: 14px 16px; }
-  .version-card-body { padding: 14px 16px 16px; }
-  .form-card { padding: 20px 16px; }
-  .item-row { flex-wrap: wrap; }
-  .item-row select { flex: 1 1 100%; }
-  .header-brand h1 { font-size: 1.25rem; }
-}
-
-/* ============================================================
-   LOADING STATE
-   ============================================================ */
-#loading-overlay {
-  position: fixed; inset: 0;
-  background: var(--cream);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9998;
-  flex-direction: column;
-  gap: 14px;
-}
-.spinner {
-  width: 38px; height: 38px;
-  border: 3px solid var(--border);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-#loading-overlay p { color: var(--text-muted); font-size: 0.9rem; }
-
-/* ============================================================
-   UTILITY
-   ============================================================ */
-.no-entries-msg {
-  text-align: center;
-  padding: 40px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-.highlight { background: rgba(201,169,97,0.25); border-radius: 3px; padding: 0 2px; }
-.count-badge {
-  display: inline-block;
-  background: var(--gold);
-  color: var(--brown-dark);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 1px 7px;
-  border-radius: 10px;
-  margin-left: 6px;
+@media(max-width:600px){
+  .header-inner{padding:14px 16px;gap:10px}
+  .header-brand h1{font-size:1.2rem}
+  #main{padding:18px 14px 60px}
+  .v-card-head{padding:12px 15px}
+  .v-card-body{padding:12px 15px 15px}
+  .form-card{padding:18px 14px}
+  .item-row{flex-wrap:wrap}
+  .item-row select{flex:1 1 100%}
 }
 </style>
 </head>
 <body>
 
-<!-- ============================================================
-     LOADING OVERLAY
-     ============================================================ -->
-<div id="loading-overlay">
-  <div class="spinner"></div>
-  <p>Lade Changelog…</p>
-</div>
+<div id="loading"><div class="spin"></div><p>Lade Changelog…</p></div>
 
-<!-- ============================================================
-     HEADER
-     ============================================================ -->
+<!-- ── HEADER ── -->
 <header id="app-header">
   <div class="header-inner">
     <div class="header-brand">
-      <h1 id="header-theme">🥜 Naughty Nuts – Changelog</h1>
-      <div class="version-badge" id="header-version">v1.1.2</div>
+      <h1 id="hdr-theme">🥜 Naughty Nuts – Changelog</h1>
+      <div class="version-badge" id="hdr-ver">v1.1.2</div>
     </div>
     <div class="header-actions">
-      <div class="mode-tabs">
-        <button class="mode-tab active" id="tab-view" onclick="switchMode('view')">
-          👁 Ansicht
-        </button>
-        <button class="mode-tab" id="tab-edit" onclick="switchMode('edit')">
-          ✏️ Bearbeiten
-        </button>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="exportData()" title="Als JSON exportieren">
-        ⬇ Export
-      </button>
-      <label class="btn btn-ghost btn-sm" title="JSON importieren" style="cursor:pointer;">
+      <button class="btn btn-primary btn-sm" onclick="openForm(null)">➕ Neue Version</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportData()">⬇ Export</button>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer">
         ⬆ Import
-        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)" />
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)" />
       </label>
     </div>
   </div>
 </header>
 
-<!-- ============================================================
-     MAIN
-     ============================================================ -->
+<!-- ── MAIN ── -->
 <main id="main">
 
-  <!-- ---- VIEW MODE ---- -->
-  <div id="view-mode">
-    <!-- Suchleiste -->
-    <div class="search-bar">
-      <div class="search-input-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input
-          type="text"
-          class="search-input"
-          id="search-input"
-          placeholder="Nach Version oder Änderung suchen…"
-          oninput="onSearch()"
-        />
-      </div>
-    </div>
-
-    <!-- Kategorie-Filter -->
-    <div class="filter-bar" id="filter-bar">
-      <span class="filter-label">Filter:</span>
-      <!-- Chips werden per JS gerendert -->
-    </div>
-
-    <!-- Einträge-Liste -->
-    <div class="entries-list" id="entries-list">
-      <!-- Versionen werden per JS gerendert -->
+  <!-- Suche -->
+  <div class="search-bar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" class="search-input" id="search-input" placeholder="Nach Version oder Änderung suchen…" oninput="onSearch()" />
     </div>
   </div>
 
-  <!-- ---- EDIT MODE ---- -->
-  <div id="edit-mode">
+  <!-- Filter -->
+  <div class="filter-bar" id="filter-bar"></div>
 
-    <!-- Neue Version hinzufügen / bearbeiten -->
-    <div class="edit-section-title" id="form-title">
-      <span>➕</span> Neue Version hinzufügen
-    </div>
-
-    <div class="form-card" id="version-form-card">
+  <!-- ── INLINE FORMULAR ── -->
+  <div id="form-panel">
+    <div class="form-card">
+      <div class="panel-head">
+        <div class="panel-title" id="panel-title"><span>➕</span> Neue Version hinzufügen</div>
+        <button class="btn btn-outline btn-sm" onclick="closeForm()">✕ Schließen</button>
+      </div>
       <div class="form-row">
         <div class="form-group">
-          <label for="form-version">Version *</label>
-          <input type="text" id="form-version" placeholder="z.B. 1.1.3" />
+          <label class="fld" for="f-version">Version *</label>
+          <input type="text" id="f-version" placeholder="z.B. 1.1.3" />
         </div>
         <div class="form-group">
-          <label for="form-date">Datum *</label>
-          <input type="date" id="form-date" />
+          <label class="fld" for="f-date">Datum *</label>
+          <input type="date" id="f-date" />
         </div>
       </div>
-
-      <div class="form-group" style="margin-bottom: 14px;">
-        <label>Einträge</label>
-        <div class="items-editor" id="items-editor">
-          <!-- Items werden per JS eingefügt -->
-        </div>
-        <button class="btn btn-outline btn-sm" onclick="addItemRow()" style="align-self: flex-start; margin-top:4px;">
-          ➕ Weiterer Eintrag
-        </button>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="fld">Einträge</label>
+        <div class="items-editor" id="items-editor"></div>
+        <button class="btn btn-outline btn-sm" onclick="addRow()" style="align-self:flex-start;margin-top:8px">➕ Weiterer Eintrag</button>
       </div>
-
       <div class="form-actions">
         <button class="btn btn-success" onclick="saveVersion()">💾 Speichern</button>
-        <button class="btn btn-outline" onclick="cancelEdit()">✕ Abbrechen</button>
+        <button class="btn btn-outline" onclick="closeForm()">✕ Abbrechen</button>
       </div>
     </div>
-
-    <hr class="section-divider" />
-
-    <!-- Bestehende Versionen -->
-    <div class="edit-section-title">
-      <span>📋</span> Bestehende Versionen
-      <span class="count-badge" id="existing-count">0</span>
-    </div>
-
-    <div class="existing-list" id="existing-list">
-      <!-- wird per JS gerendert -->
-    </div>
-
   </div>
+
+  <!-- ── LISTE ── -->
+  <div class="entries-list" id="entries-list"></div>
+
 </main>
 
-<!-- ============================================================
-     TOAST CONTAINER
-     ============================================================ -->
-<div id="toast-container"></div>
+<div id="toasts"></div>
+<div id="modal-wrap"></div>
 
-<!-- ============================================================
-     MODAL TEMPLATE (Löschen-Bestätigung)
-     ============================================================ -->
-<div id="modal-container"></div>
-
-<!-- ============================================================
-     JAVASCRIPT
-     ============================================================ -->
 <script>
 'use strict';
 
-/* ============================================================
-   KONFIGURATION & KONSTANTEN
-   ============================================================ */
-const DB_NAME    = 'NaughtyNutsChangelog';
-const DB_VERSION = 1;
-const STORE_NAME = 'changelog';
-const CATEGORIES = ['Neu', 'Geändert', 'Fixes', 'Breaking Changes', 'Known Issues'];
-const CAT_COLORS = {
-  'Neu'             : '#4CAF50',
-  'Geändert'        : '#2196F3',
-  'Fixes'           : '#FF9800',
-  'Breaking Changes': '#F44336',
-  'Known Issues'    : '#9E9E9E',
+/* ── KONSTANTEN ── */
+const DB_NAME = 'NaughtyNutsChangelog';
+const DB_VER  = 1;
+const STORE   = 'changelog';
+const CATS    = ['Neu','Geändert','Fixes','Breaking Changes','Known Issues'];
+const CAT_COL = {
+  'Neu':'#4CAF50','Geändert':'#2196F3','Fixes':'#FF9800',
+  'Breaking Changes':'#F44336','Known Issues':'#9E9E9E'
+};
+const CAT_BG = {
+  'Neu':'#e8f5e9','Geändert':'#e3f2fd','Fixes':'#fff3e0',
+  'Breaking Changes':'#ffebee','Known Issues':'#f5f5f5'
+};
+const CAT_FG = {
+  'Neu':'#2e7d32','Geändert':'#1565c0','Fixes':'#e65100',
+  'Breaking Changes':'#b71c1c','Known Issues':'#424242'
 };
 
-/* ============================================================
-   APP STATE
-   ============================================================ */
-let state = {
-  db:           null,          // IndexedDB instance
-  entries:      [],            // [{version, date, items:[{category, text}]}]
-  theme:        'Naughty Nuts Theme',
-  currentVersion: '1.1.2',
-  activeFilters: new Set(CATEGORIES),  // alle aktiv
-  searchQuery:  '',
-  editingVersion: null,        // null = neu, string = bearbeiten
+const INITIAL = {
+  theme:'Naughty Nuts Theme', currentVersion:'1.1.2',
+  entries:[
+    { version:'1.1.2', date:'2026-04-02', items:[
+      {category:'Geändert',     text:'Sticky Add-to-Cart Mobile optimiert – Z-Index und Touch-Feedback verbessert'},
+      {category:'Fixes',        text:'Farbkontrast CTA-Buttons auf WCAG AA angehoben (Ratio 4.8:1)'},
+      {category:'Fixes',        text:'Meta Pixel Sandbox-Warnung in Browser-Konsole behoben'},
+      {category:'Known Issues', text:'iOS Safari: Sticky Header bei schnellem Scroll gelegentlich flackernd'},
+    ]},
+    { version:'1.1.1', date:'2026-03-18', items:[
+      {category:'Neu',      text:'Mix & Save Bundle-Tool: Dynamische Rabatt-Badges nach Tier-Level'},
+      {category:'Neu',      text:'Discount-Code wird automatisch via /checkout?discount= übergeben'},
+      {category:'Geändert', text:'Variant-Selection Modal: Mobile Sticky Bottom Bar implementiert'},
+      {category:'Fixes',    text:'Cart-Submit via /cart/add.js mit line_item_properties korrigiert'},
+    ]},
+    { version:'1.1.0', date:'2026-03-05', items:[
+      {category:'Neu',              text:'Category Button Slider Section: Horizontales Scrollen mit Snap + Pfeil-Navigation'},
+      {category:'Neu',              text:'Media Grid Section: Per-Block Row-Height Override eingebaut'},
+      {category:'Neu',              text:'Bio-Zertifizierungs-Badge DE-ÖKO-006 im Footer integriert'},
+      {category:'Geändert',         text:'Email-Templates auf Warm-Design-System migriert (Beige/Braun/Gold)'},
+      {category:'Breaking Changes', text:'Knofedt-Font muss manuell in Theme-Assets hochgeladen sein'},
+    ]},
+    { version:'1.0.5', date:'2026-02-12', items:[
+      {category:'Neu',      text:'DSGVO/Cookie-Compliance-Audit abgeschlossen, WCAG A/AA-Fixes umgesetzt'},
+      {category:'Geändert', text:'Make (Integromat) Automation: Tally → Google Sheets → Shopify Influencer-Flow'},
+      {category:'Fixes',    text:'Web Pixel Sandbox Fehler bei Consent-Mode V2 behoben'},
+      {category:'Fixes',    text:'Focus-Styles für alle interaktiven Elemente nachgerüstet'},
+    ]},
+  ]
 };
 
-/* ============================================================
-   INITIALDATEN
-   ============================================================ */
-const INITIAL_DATA = {
-  theme: 'Naughty Nuts Theme',
-  currentVersion: '1.1.2',
-  entries: [
-    {
-      version: '1.1.2',
-      date: '2026-04-02',
-      items: [
-        { category: 'Geändert', text: 'Sticky Add-to-Cart Mobile optimiert – Z-Index und Touch-Feedback verbessert' },
-        { category: 'Fixes',    text: 'Farbkontrast CTA-Buttons auf WCAG AA angehoben (Ratio 4.8:1)' },
-        { category: 'Fixes',    text: 'Meta Pixel Sandbox-Warnung in Browser-Konsole behoben' },
-        { category: 'Known Issues', text: 'iOS Safari: Sticky Header bei schnellem Scroll gelegentlich flackernd' },
-      ],
-    },
-    {
-      version: '1.1.1',
-      date: '2026-03-18',
-      items: [
-        { category: 'Neu',      text: 'Mix & Save Bundle-Tool: Dynamische Rabatt-Badges nach Tier-Level' },
-        { category: 'Neu',      text: 'Discount-Code wird automatisch via /checkout?discount= übergeben' },
-        { category: 'Geändert', text: 'Variant-Selection Modal: Mobile Sticky Bottom Bar implementiert' },
-        { category: 'Fixes',    text: 'Cart-Submit via /cart/add.js mit line_item_properties korrigiert' },
-      ],
-    },
-    {
-      version: '1.1.0',
-      date: '2026-03-05',
-      items: [
-        { category: 'Neu',      text: 'Category Button Slider Section: Horizontales Scrollen mit Snap + Pfeil-Navigation' },
-        { category: 'Neu',      text: 'Media Grid Section: Per-Block Row-Height Override eingebaut' },
-        { category: 'Neu',      text: 'Bio-Zertifizierungs-Badge DE-ÖKO-006 im Footer integriert' },
-        { category: 'Geändert', text: 'Email-Templates auf Warm-Design-System migriert (Beige/Braun/Gold)' },
-        { category: 'Breaking Changes', text: 'Knofedt-Font muss manuell in Theme-Assets hochgeladen sein' },
-      ],
-    },
-    {
-      version: '1.0.5',
-      date: '2026-02-12',
-      items: [
-        { category: 'Neu',      text: 'DSGVO/Cookie-Compliance-Audit abgeschlossen, WCAG A/AA-Fixes umgesetzt' },
-        { category: 'Geändert', text: 'Make (Integromat) Automation: Tally → Google Sheets → Shopify Influencer-Flow' },
-        { category: 'Fixes',    text: 'Web Pixel Sandbox Fehler bei Consent-Mode V2 behoben' },
-        { category: 'Fixes',    text: 'Focus-Styles für alle interaktiven Elemente nachgerüstet' },
-      ],
-    },
-  ],
-};
+/* ── STATE ── */
+let dbConn         = null;
+let entries        = [];
+let theme          = 'Naughty Nuts Theme';
+let currentVersion = '1.1.2';
+let activeFilters  = new Set(CATS);
+let searchQ        = '';
+let editingVersion = null;  // null=neu, string=bearbeiten
 
-/* ============================================================
-   INDEXEDDB SETUP
-   ============================================================ */
-async function initDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
+/* ── INDEXEDDB ── */
+function openDB() {
+  return new Promise((ok, fail) => {
+    const r = indexedDB.open(DB_NAME, DB_VER);
+    r.onupgradeneeded = e => {
+      if (!e.target.result.objectStoreNames.contains(STORE))
+        e.target.result.createObjectStore(STORE, {keyPath:'id'});
     };
-
-    req.onsuccess = (e) => { resolve(e.target.result); };
-    req.onerror   = (e) => { reject(e.target.error); };
+    r.onsuccess = e => ok(e.target.result);
+    r.onerror   = e => fail(e.target.error);
+  });
+}
+function dbGet(key) {
+  return new Promise((ok,fail) => {
+    const r = dbConn.transaction(STORE,'readonly').objectStore(STORE).get(key);
+    r.onsuccess = () => ok(r.result);
+    r.onerror   = () => fail(r.error);
+  });
+}
+function dbPut(val) {
+  return new Promise((ok,fail) => {
+    const r = dbConn.transaction(STORE,'readwrite').objectStore(STORE).put(val);
+    r.onsuccess = () => ok();
+    r.onerror   = () => fail(r.error);
   });
 }
 
-async function dbGet(db, key) {
-  return new Promise((resolve, reject) => {
-    const tx   = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const req  = store.get(key);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-async function dbPut(db, value) {
-  return new Promise((resolve, reject) => {
-    const tx   = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const req  = store.put(value);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-/* ============================================================
-   DATEN LADEN / SPEICHERN
-   ============================================================ */
+/* ── LADEN / SPEICHERN ── */
 async function loadData() {
   try {
-    state.db = await initDB();
-    const record = await dbGet(state.db, 'main');
-
-    if (record) {
-      state.entries       = record.entries        || [];
-      state.theme         = record.theme          || state.theme;
-      state.currentVersion= record.currentVersion || state.currentVersion;
+    dbConn = await openDB();
+    const rec = await dbGet('main');
+    if (rec) {
+      entries=rec.entries||[]; theme=rec.theme||theme; currentVersion=rec.currentVersion||currentVersion;
     } else {
-      // Erste Nutzung: Beispieldaten laden
-      state.entries        = INITIAL_DATA.entries;
-      state.theme          = INITIAL_DATA.theme;
-      state.currentVersion = INITIAL_DATA.currentVersion;
-      await saveData();
+      entries=INITIAL.entries; theme=INITIAL.theme; currentVersion=INITIAL.currentVersion;
+      await persist();
     }
-  } catch (err) {
-    // Fallback auf LocalStorage
-    console.warn('IndexedDB nicht verfügbar, verwende LocalStorage:', err);
+  } catch(e) {
+    console.warn('IndexedDB fehlgeschlagen, nutze LocalStorage', e);
     try {
-      const raw = localStorage.getItem('nn_changelog');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        state.entries        = parsed.entries        || [];
-        state.theme          = parsed.theme          || state.theme;
-        state.currentVersion = parsed.currentVersion || state.currentVersion;
-      } else {
-        state.entries        = INITIAL_DATA.entries;
-        state.theme          = INITIAL_DATA.theme;
-        state.currentVersion = INITIAL_DATA.currentVersion;
-        saveToLocalStorage();
-      }
-    } catch (lsErr) {
-      console.error('LocalStorage auch nicht verfügbar:', lsErr);
-      state.entries = INITIAL_DATA.entries;
-    }
+      const raw = localStorage.getItem('nn_cl');
+      if (raw) { const d=JSON.parse(raw); entries=d.entries||[]; theme=d.theme||theme; currentVersion=d.currentVersion||currentVersion; }
+      else     { entries=INITIAL.entries; theme=INITIAL.theme; currentVersion=INITIAL.currentVersion; lsSave(); }
+    } catch(e2) { entries=INITIAL.entries; }
   }
 }
-
-async function saveData() {
-  const record = {
-    id:             'main',
-    theme:          state.theme,
-    currentVersion: state.currentVersion,
-    entries:        state.entries,
-  };
+async function persist() {
   try {
-    if (state.db) {
-      await dbPut(state.db, record);
-    } else {
-      saveToLocalStorage();
-    }
-  } catch (err) {
-    console.error('Fehler beim Speichern:', err);
-    saveToLocalStorage();
-  }
+    if (dbConn) await dbPut({id:'main', theme, currentVersion, entries});
+    else        lsSave();
+  } catch(e) { lsSave(); }
+}
+function lsSave() {
+  try { localStorage.setItem('nn_cl', JSON.stringify({theme, currentVersion, entries})); } catch(e){}
 }
 
-function saveToLocalStorage() {
-  try {
-    localStorage.setItem('nn_changelog', JSON.stringify({
-      theme:          state.theme,
-      currentVersion: state.currentVersion,
-      entries:        state.entries,
-    }));
-  } catch (err) {
-    console.error('LocalStorage Fehler:', err);
-  }
-}
-
-/* ============================================================
-   RENDER: VIEW MODE
-   ============================================================ */
-function renderAll() {
-  updateHeader();
-  renderFilterChips();
-  renderEntries();
-  renderExistingList();
-  document.getElementById('existing-count').textContent = state.entries.length;
-}
-
-function updateHeader() {
-  document.getElementById('header-theme').textContent   = '🥜 ' + state.theme + ' – Changelog';
-  document.getElementById('header-version').textContent = 'v' + state.currentVersion;
-}
-
-function renderFilterChips() {
-  const bar = document.getElementById('filter-bar');
-  bar.innerHTML = '<span class="filter-label">Filter:</span>';
-  CATEGORIES.forEach(cat => {
-    const active = state.activeFilters.has(cat);
-    const chip = document.createElement('label');
-    chip.className = `filter-chip ${active ? 'active' : 'inactive'}`;
-    chip.dataset.cat = cat;
-    chip.innerHTML = `
-      <input type="checkbox" ${active ? 'checked' : ''} onchange="toggleFilter('${cat}')" />
-      <span class="dot" style="background:${CAT_COLORS[cat]}"></span>
-      ${escHtml(cat)}
-    `;
-    bar.appendChild(chip);
-  });
-}
-
-function toggleFilter(cat) {
-  if (state.activeFilters.has(cat)) {
-    state.activeFilters.delete(cat);
-  } else {
-    state.activeFilters.add(cat);
-  }
-  renderFilterChips();
-  renderEntries();
-}
-
-function onSearch() {
-  state.searchQuery = document.getElementById('search-input').value.trim();
-  renderEntries();
-}
-
-function getFilteredEntries() {
-  const q = state.searchQuery.toLowerCase();
-  return state.entries
-    .filter(entry => {
-      // Suchfilter
-      if (q) {
-        const matchVersion = entry.version.toLowerCase().includes(q);
-        const matchItems   = entry.items.some(i => i.text.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
-        if (!matchVersion && !matchItems) return false;
-      }
-      // Kategoriefilter: Eintrag wird gezeigt, wenn mindestens ein Item der aktiven Kategorien enthalten ist
-      const hasVisibleItem = entry.items.some(i => state.activeFilters.has(i.category));
-      return hasVisibleItem;
-    })
-    // Sortierung: neueste zuerst (semantische Version, dann Datum als Fallback)
-    .sort((a, b) => {
-      const diff = compareSemver(b.version, a.version);
-      if (diff !== 0) return diff;
-      return b.date.localeCompare(a.date);
-    });
-}
-
-function compareSemver(a, b) {
-  const pa = a.split('.').map(n => parseInt(n, 10) || 0);
-  const pb = b.split('.').map(n => parseInt(n, 10) || 0);
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const diff = (pa[i] || 0) - (pb[i] || 0);
-    if (diff !== 0) return diff;
-  }
+/* ── HELPERS ── */
+function esc(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function eA(s)   { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function eR(s)   { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){ if(!iso)return'–'; try{ const[y,m,d]=iso.split('-'); return `${d}.${m}.${y}`; } catch(e){ return iso; } }
+function hl(text, q) { if(!q) return text; return text.replace(new RegExp(`(${eR(q)})`,'gi'),'<mark class="hl">$1</mark>'); }
+function cmpVer(a,b) {
+  const pa=a.split('.').map(n=>parseInt(n)||0);
+  const pb=b.split('.').map(n=>parseInt(n)||0);
+  for(let i=0;i<Math.max(pa.length,pb.length);i++){ const d=(pa[i]||0)-(pb[i]||0); if(d!==0)return d; }
   return 0;
 }
 
-function renderEntries() {
-  const list      = document.getElementById('entries-list');
-  const entries   = getFilteredEntries();
-  const q         = state.searchQuery.toLowerCase();
+/* ── HEADER ── */
+function updateHeader() {
+  document.getElementById('hdr-theme').textContent = '🥜 ' + theme + ' – Changelog';
+  document.getElementById('hdr-ver').textContent   = 'v' + currentVersion;
+}
 
-  if (entries.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">🔍</div>
-        <p>Keine Einträge gefunden</p>
-        <small>Passe Suche oder Filter an</small>
-      </div>
-    `;
+/* ── FILTER CHIPS ── */
+function renderFilters() {
+  const bar = document.getElementById('filter-bar');
+  bar.innerHTML = '<span class="filter-label">Filter:</span>';
+  CATS.forEach(cat => {
+    const on = activeFilters.has(cat);
+    const el = document.createElement('label');
+    el.className = `chip${on?'':' off'}`;
+    el.dataset.cat = cat;
+    el.innerHTML = `<input type="checkbox"${on?' checked':''}/><span class="chip-dot" style="background:${CAT_COL[cat]}"></span>${esc(cat)}`;
+    el.addEventListener('change', () => {
+      if (activeFilters.has(cat)) activeFilters.delete(cat); else activeFilters.add(cat);
+      renderFilters(); renderEntries();
+    });
+    bar.appendChild(el);
+  });
+}
+
+/* ── GEFILTERTE LISTE ── */
+function getVisible() {
+  const q = searchQ.toLowerCase();
+  return entries
+    .filter(e => {
+      if (q) {
+        const mv = e.version.toLowerCase().includes(q);
+        const mi = e.items.some(i => i.text.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
+        if (!mv && !mi) return false;
+      }
+      return e.items.some(i => activeFilters.has(i.category));
+    })
+    .sort((a,b) => { const d=cmpVer(b.version,a.version); return d!==0?d:b.date.localeCompare(a.date); });
+}
+
+/* ── EINTRÄGE RENDERN ── */
+function renderEntries() {
+  const list = document.getElementById('entries-list');
+  const vis  = getVisible();
+  const q    = searchQ.toLowerCase();
+
+  if (!vis.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Keine Einträge gefunden</p><small>Passe Suche oder Filter an</small></div>`;
     return;
   }
 
   list.innerHTML = '';
+  vis.forEach(entry => {
+    const visible = entry.items.filter(i => activeFilters.has(i.category));
+    const bycat   = {};
+    visible.forEach(i => { if(!bycat[i.category]) bycat[i.category]=[]; bycat[i.category].push(i); });
 
-  entries.forEach(entry => {
-    // Nur Items zeigen, die zur aktiven Filterliste gehören
-    const visibleItems = entry.items.filter(i => state.activeFilters.has(i.category));
-
-    // Items nach Kategorie gruppieren
-    const byCategory = {};
-    visibleItems.forEach(item => {
-      if (!byCategory[item.category]) byCategory[item.category] = [];
-      byCategory[item.category].push(item);
+    let catsHtml = '';
+    CATS.forEach(cat => {
+      if (!bycat[cat]) return;
+      catsHtml += `
+        <div class="cat-block">
+          <div class="cat-label" style="background:${CAT_BG[cat]};color:${CAT_FG[cat]}">
+            <span class="cat-dot" style="background:${CAT_COL[cat]}"></span>${esc(cat)}
+          </div>
+          <ul class="item-list">
+            ${bycat[cat].map(i=>`<li>${hl(esc(i.text),q)}</li>`).join('')}
+          </ul>
+        </div>`;
     });
 
     const card = document.createElement('div');
-    card.className = 'version-card';
-    card.dataset.version = entry.version;
-
-    // Datum formatieren
-    const dateStr = formatDate(entry.date);
-
-    // Kategorien-HTML
-    let catsHtml = '';
-    CATEGORIES.forEach(cat => {
-      if (!byCategory[cat]) return;
-      const safeClass = cat.replace(/\s+/g, '\\ ');
-      catsHtml += `
-        <div class="items-by-category">
-          <div class="cat-group-label cat-label-${escAttr(cat)}">
-            <span class="cat-dot cat-dot-${escAttr(cat)}" style="background:${CAT_COLORS[cat]}"></span>
-            ${escHtml(cat)}
-          </div>
-          <ul class="item-list">
-            ${byCategory[cat].map(item => `
-              <li>${highlightText(escHtml(item.text), q)}</li>
-            `).join('')}
-          </ul>
-        </div>
-      `;
-    });
-
+    card.className = 'v-card';
     card.innerHTML = `
-      <div class="version-card-header">
+      <div class="v-card-head">
         <div>
-          <div class="version-tag">v${highlightText(escHtml(entry.version), q)}</div>
-          <div class="version-date">${dateStr}</div>
+          <div class="v-tag">v${hl(esc(entry.version),q)}</div>
+          <div class="v-date">${fmtDate(entry.date)}</div>
         </div>
-        <div class="version-card-actions">
-          <button class="btn btn-outline btn-sm" onclick="startEditVersion('${escAttr(entry.version)}')">✏️ Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${escAttr(entry.version)}')">🗑 Löschen</button>
+        <div class="v-card-actions">
+          <button class="btn btn-outline btn-sm" data-edit="${eA(entry.version)}">✏️ Bearbeiten</button>
+          <button class="btn btn-danger btn-sm"  data-del="${eA(entry.version)}">🗑</button>
         </div>
       </div>
-      <div class="version-card-body">${catsHtml}</div>
-    `;
+      <div class="v-card-body">${catsHtml}</div>`;
 
+    // Event Listener direkt anhängen (kein onclick-String → kein Escaping-Problem)
+    card.querySelector('[data-edit]').addEventListener('click', () => openForm(entry.version));
+    card.querySelector('[data-del]').addEventListener('click',  () => confirmDelete(entry.version));
     list.appendChild(card);
   });
 }
 
-function highlightText(text, q) {
-  if (!q) return text;
-  const re = new RegExp(`(${escRegex(q)})`, 'gi');
-  return text.replace(re, '<mark class="highlight">$1</mark>');
+function onSearch() {
+  searchQ = document.getElementById('search-input').value.trim();
+  renderEntries();
 }
 
-function formatDate(iso) {
-  if (!iso) return '–';
-  try {
-    const [y, m, d] = iso.split('-');
-    return `${d}.${m}.${y}`;
-  } catch { return iso; }
+/* ── FORMULAR ──────────────────────────────────────────────────
+   formRows ist das SOURCE OF TRUTH für den Formular-Inhalt.
+   syncFromDOM() liest vor jeder Mutation die aktuellen DOM-Werte
+   zurück, damit kein Input-Wert verloren geht.
+   ────────────────────────────────────────────────────────────── */
+let formRows = [{category:'Neu', text:''}];
+
+function syncFromDOM() {
+  const rows = document.querySelectorAll('#items-editor .item-row');
+  rows.forEach((row, idx) => {
+    const sel = row.querySelector('select');
+    const inp = row.querySelector('input[type="text"]');
+    if (sel && inp && formRows[idx] !== undefined) {
+      formRows[idx].category = sel.value;
+      formRows[idx].text     = inp.value;
+    }
+  });
 }
 
-/* ============================================================
-   RENDER: EDIT MODE – Bestehende Versionen
-   ============================================================ */
-function renderExistingList() {
-  const list = document.getElementById('existing-list');
-  document.getElementById('existing-count').textContent = state.entries.length;
-
-  if (state.entries.length === 0) {
-    list.innerHTML = '<div class="no-entries-msg">Noch keine Versionen vorhanden.</div>';
-    return;
-  }
-
-  const sorted = [...state.entries].sort((a, b) => compareSemver(b.version, a.version));
-  list.innerHTML = sorted.map(entry => `
-    <div class="existing-item">
-      <div class="existing-meta">
-        <strong>v${escHtml(entry.version)}</strong>
-        <span>${formatDate(entry.date)} · ${entry.items.length} Einträge</span>
-      </div>
-      <div class="existing-actions">
-        <button class="btn btn-outline btn-sm" onclick="startEditVersion('${escAttr(entry.version)}')">✏️ Bearbeiten</button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDelete('${escAttr(entry.version)}')">🗑</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-/* ============================================================
-   EDIT FORM
-   ============================================================ */
-let formItems = []; // [{category, text}]
-
-function initForm(version = null) {
-  const titleEl = document.getElementById('form-title');
-
-  if (version) {
-    const entry = state.entries.find(e => e.version === version);
-    if (!entry) return;
-    state.editingVersion = version;
-    document.getElementById('form-version').value = entry.version;
-    document.getElementById('form-date').value    = entry.date;
-    formItems = entry.items.map(i => ({ ...i }));
-    titleEl.innerHTML = '<span>✏️</span> Version bearbeiten: <strong>v' + escHtml(version) + '</strong>';
-  } else {
-    state.editingVersion = null;
-    document.getElementById('form-version').value = '';
-    document.getElementById('form-date').value    = new Date().toISOString().slice(0, 10);
-    formItems = [{ category: 'Neu', text: '' }];
-    titleEl.innerHTML = '<span>➕</span> Neue Version hinzufügen';
-  }
-
-  renderItemRows();
-  // Scroll to form
-  document.getElementById('version-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function renderItemRows() {
+function renderRows() {
   const editor = document.getElementById('items-editor');
   editor.innerHTML = '';
 
-  if (formItems.length === 0) {
-    formItems = [{ category: 'Neu', text: '' }];
-  }
-
-  formItems.forEach((item, idx) => {
+  formRows.forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.innerHTML = `
-      <select onchange="updateItem(${idx}, 'category', this.value)">
-        ${CATEGORIES.map(c => `<option value="${escAttr(c)}" ${item.category === c ? 'selected' : ''}>${escHtml(c)}</option>`).join('')}
-      </select>
-      <input
-        type="text"
-        placeholder="Änderung beschreiben…"
-        value="${escAttr(item.text)}"
-        oninput="updateItem(${idx}, 'text', this.value)"
-        onkeydown="if(event.key==='Enter'){event.preventDefault();addItemRow();}"
-      />
-      <button class="btn-remove" onclick="removeItem(${idx})" title="Eintrag entfernen">✕</button>
-    `;
+
+    const sel = document.createElement('select');
+    CATS.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      if (c === item.category) o.selected = true;
+      sel.appendChild(o);
+    });
+
+    const inp = document.createElement('input');
+    inp.type        = 'text';
+    inp.placeholder = 'Änderung beschreiben…';
+    inp.value       = item.text;
+
+    // Beim Enter direkt neues Row hinzufügen
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); syncFromDOM(); addRow(); }
+    });
+
+    const rm = document.createElement('button');
+    rm.type      = 'button';
+    rm.className = 'btn-rm';
+    rm.title     = 'Entfernen';
+    rm.textContent = '✕';
+    rm.addEventListener('click', () => {
+      syncFromDOM();
+      formRows.splice(idx, 1);
+      if (!formRows.length) formRows = [{category:'Neu', text:''}];
+      renderRows();
+    });
+
+    row.appendChild(sel);
+    row.appendChild(inp);
+    row.appendChild(rm);
     editor.appendChild(row);
   });
 }
 
-function addItemRow() {
-  formItems.push({ category: 'Neu', text: '' });
-  renderItemRows();
-  // Fokus auf neues Input setzen
-  const inputs = document.querySelectorAll('#items-editor .item-row input');
-  if (inputs.length > 0) inputs[inputs.length - 1].focus();
+function addRow() {
+  // syncFromDOM wurde bereits vom Aufrufer gemacht oder passiert hier
+  syncFromDOM();
+  formRows.push({category:'Neu', text:''});
+  renderRows();
+  const inputs = document.querySelectorAll('#items-editor input[type="text"]');
+  if (inputs.length) inputs[inputs.length-1].focus();
 }
 
-function updateItem(idx, field, value) {
-  if (formItems[idx]) formItems[idx][field] = value;
-}
+function openForm(version) {
+  editingVersion = version;
+  const panel = document.getElementById('form-panel');
 
-function removeItem(idx) {
-  formItems.splice(idx, 1);
-  if (formItems.length === 0) formItems = [{ category: 'Neu', text: '' }];
-  renderItemRows();
-}
+  if (version !== null) {
+    // ── BEARBEITEN ──
+    const entry = entries.find(e => e.version === version);
+    if (!entry) { toast('Version nicht gefunden.','error'); return; }
 
-async function saveVersion() {
-  // Validierung
-  const version = document.getElementById('form-version').value.trim();
-  const date    = document.getElementById('form-date').value.trim();
+    document.getElementById('panel-title').innerHTML =
+      `<span>✏️</span> Bearbeiten: <strong>v${esc(version)}</strong>`;
+    document.getElementById('f-version').value = entry.version;
+    document.getElementById('f-date').value    = entry.date;
 
-  if (!version) { showToast('Bitte eine Version eingeben.', 'error'); return; }
-  if (!date)    { showToast('Bitte ein Datum eingeben.', 'error'); return; }
-
-  // Versions-Format-Check (loose)
-  if (!/^\d+(\.\d+)*$/.test(version)) {
-    showToast('Bitte ein gültiges Versions-Format verwenden (z.B. 1.2.3).', 'error');
-    return;
-  }
-
-  // Items bereinigen (leere Items ignorieren)
-  const items = formItems
-    .map(i => ({ category: i.category, text: i.text.trim() }))
-    .filter(i => i.text.length > 0);
-
-  if (items.length === 0) {
-    showToast('Bitte mindestens einen Eintrag hinzufügen.', 'error');
-    return;
-  }
-
-  if (state.editingVersion) {
-    // Update bestehende Version
-    const idx = state.entries.findIndex(e => e.version === state.editingVersion);
-    if (idx !== -1) {
-      state.entries[idx] = { version, date, items };
-    }
+    // Tiefe Kopie der Items
+    formRows = entry.items.map(i => ({category: i.category, text: i.text}));
   } else {
-    // Doppelten Check
-    if (state.entries.find(e => e.version === version)) {
-      showToast(`Version ${version} existiert bereits.`, 'error');
-      return;
-    }
-    state.entries.unshift({ version, date, items });
+    // ── NEU ──
+    document.getElementById('panel-title').innerHTML = '<span>➕</span> Neue Version hinzufügen';
+    document.getElementById('f-version').value = '';
+    document.getElementById('f-date').value    = todayISO();
+    formRows = [{category:'Neu', text:''}];
   }
 
-  // Aktuelle Version ggf. aktualisieren
-  const sorted = [...state.entries].sort((a, b) => compareSemver(b.version, a.version));
-  state.currentVersion = sorted[0]?.version || version;
-
-  await saveData();
-  renderAll();
-  cancelEdit();
-  showToast(`Version ${version} gespeichert! 🎉`, 'success');
-  launchConfetti();
+  renderRows();
+  panel.style.display = 'block';
+  // Scroll zum Formular
+  setTimeout(() => panel.scrollIntoView({behavior:'smooth', block:'start'}), 30);
 }
 
-function cancelEdit() {
-  state.editingVersion = null;
-  formItems = [{ category: 'Neu', text: '' }];
-  document.getElementById('form-version').value = '';
-  document.getElementById('form-date').value    = new Date().toISOString().slice(0, 10);
-  document.getElementById('form-title').innerHTML = '<span>➕</span> Neue Version hinzufügen';
-  renderItemRows();
+function closeForm() {
+  document.getElementById('form-panel').style.display = 'none';
+  editingVersion = null;
+  formRows = [{category:'Neu', text:''}];
 }
 
-function startEditVersion(version) {
-  switchMode('edit');
-  initForm(version);
+/* ── SPEICHERN ── */
+async function saveVersion() {
+  // Immer zuerst DOM-Werte lesen!
+  syncFromDOM();
+
+  const version = document.getElementById('f-version').value.trim();
+  const date    = document.getElementById('f-date').value.trim();
+
+  if (!version)                        { toast('Bitte eine Version eingeben.','error'); return; }
+  if (!/^\d+(\.\d+)*$/.test(version)) { toast('Format ungültig – z.B. 1.2.3','error'); return; }
+  if (!date)                           { toast('Bitte ein Datum wählen.','error'); return; }
+
+  const items = formRows
+    .map(r => ({category: r.category, text: r.text.trim()}))
+    .filter(r => r.text.length > 0);
+
+  if (!items.length) { toast('Mindestens einen Eintrag hinzufügen.','error'); return; }
+
+  if (editingVersion !== null) {
+    // Update bestehende Version
+    const idx = entries.findIndex(e => e.version === editingVersion);
+    if (idx !== -1) entries[idx] = {version, date, items};
+    else            entries.push({version, date, items});
+  } else {
+    // Neu – Duplikat-Check
+    if (entries.find(e => e.version === version)) {
+      toast(`Version ${version} existiert bereits.`, 'error'); return;
+    }
+    entries.unshift({version, date, items});
+  }
+
+  // Aktuellste Version ermitteln
+  const sorted = [...entries].sort((a,b) => cmpVer(b.version, a.version));
+  currentVersion = sorted[0]?.version || version;
+
+  await persist();
+  updateHeader();
+  renderEntries();
+  closeForm();
+  toast(`Version ${version} gespeichert! 🎉`, 'success');
+  doConfetti();
 }
 
-/* ============================================================
-   LÖSCHEN MIT BESTÄTIGUNG
-   ============================================================ */
+/* ── LÖSCHEN ── */
 function confirmDelete(version) {
-  const container = document.getElementById('modal-container');
-  container.innerHTML = `
-    <div class="modal-backdrop" id="modal-backdrop">
-      <div class="modal">
-        <h3>Version löschen?</h3>
-        <p>Willst du Version <strong>v${escHtml(version)}</strong> wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</p>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Abbrechen</button>
-          <button class="btn btn-danger" onclick="deleteVersion('${escAttr(version)}')">🗑 Löschen</button>
-        </div>
+  const wrap = document.getElementById('modal-wrap');
+  const bg   = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.id = 'mbg';
+  bg.innerHTML = `
+    <div class="modal">
+      <h3>Version löschen?</h3>
+      <p>Willst du <strong>v${esc(version)}</strong> wirklich löschen? Diese Aktion ist nicht rückgängig zu machen.</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="mbtn-cancel">Abbrechen</button>
+        <button class="btn btn-danger"  id="mbtn-del">🗑 Löschen</button>
       </div>
-    </div>
-  `;
-  // Backdrop-Klick schließt Modal
-  document.getElementById('modal-backdrop').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('modal-backdrop')) closeModal();
-  });
+    </div>`;
+  wrap.innerHTML = '';
+  wrap.appendChild(bg);
+
+  bg.addEventListener('click', e => { if(e.target===bg) closeModal(); });
+  bg.querySelector('#mbtn-cancel').addEventListener('click', closeModal);
+  bg.querySelector('#mbtn-del').addEventListener('click', () => doDelete(version));
 }
 
 function closeModal() {
-  document.getElementById('modal-container').innerHTML = '';
+  document.getElementById('modal-wrap').innerHTML = '';
 }
 
-async function deleteVersion(version) {
-  state.entries = state.entries.filter(e => e.version !== version);
-
-  // Aktuelle Version aktualisieren
-  const sorted = [...state.entries].sort((a, b) => compareSemver(b.version, a.version));
-  state.currentVersion = sorted[0]?.version || '–';
-
-  await saveData();
+async function doDelete(version) {
+  entries = entries.filter(e => e.version !== version);
+  const sorted = [...entries].sort((a,b) => cmpVer(b.version, a.version));
+  currentVersion = sorted[0]?.version || '–';
+  await persist();
   closeModal();
-  renderAll();
-  showToast(`Version ${version} gelöscht.`, 'info');
+  updateHeader();
+  renderEntries();
+  toast(`Version ${version} gelöscht.`, 'info');
 }
 
-/* ============================================================
-   MODE SWITCHING
-   ============================================================ */
-function switchMode(mode) {
-  const viewEl = document.getElementById('view-mode');
-  const editEl = document.getElementById('edit-mode');
-  const tabView = document.getElementById('tab-view');
-  const tabEdit = document.getElementById('tab-edit');
-
-  if (mode === 'view') {
-    viewEl.style.display = '';
-    editEl.style.display = 'none';
-    tabView.classList.add('active');
-    tabEdit.classList.remove('active');
-    renderEntries();
-  } else {
-    viewEl.style.display = 'none';
-    editEl.style.display = '';
-    tabView.classList.remove('active');
-    tabEdit.classList.add('active');
-    renderExistingList();
-    if (!state.editingVersion) initForm(null);
-  }
-}
-
-/* ============================================================
-   EXPORT / IMPORT
-   ============================================================ */
+/* ── EXPORT / IMPORT ── */
 function exportData() {
-  const data = {
-    theme:          state.theme,
-    currentVersion: state.currentVersion,
-    entries:        state.entries,
-    exportedAt:     new Date().toISOString(),
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const d = {theme, currentVersion, entries, exportedAt: new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(d,null,2)], {type:'application/json'});
   const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `changelog-export-${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const a    = Object.assign(document.createElement('a'), {href:url, download:`changelog-${todayISO()}.json`});
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('Export erfolgreich!', 'success');
+  toast('Export erfolgreich!','success');
 }
 
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
+function importData(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = async ev => {
     try {
-      const data = JSON.parse(e.target.result);
-
-      // Validierung
-      if (!data.entries || !Array.isArray(data.entries)) {
-        showToast('Ungültiges Format – entries fehlt.', 'error');
-        return;
-      }
-
-      const confirmed = await confirmImport(data.entries.length);
-      if (!confirmed) return;
-
-      state.entries        = data.entries;
-      state.theme          = data.theme          || state.theme;
-      state.currentVersion = data.currentVersion || state.currentVersion;
-
-      await saveData();
-      renderAll();
-      showToast(`${data.entries.length} Versionen importiert!`, 'success');
-    } catch (err) {
-      showToast('Fehler beim Import: Ungültiges JSON.', 'error');
-      console.error(err);
-    }
-    // Input zurücksetzen
-    event.target.value = '';
+      const d = JSON.parse(ev.target.result);
+      if (!Array.isArray(d.entries)) { toast('Ungültiges Format.','error'); return; }
+      const ok = await confirmImport(d.entries.length);
+      if (!ok) return;
+      entries=d.entries; theme=d.theme||theme; currentVersion=d.currentVersion||currentVersion;
+      await persist(); updateHeader(); renderFilters(); renderEntries();
+      toast(`${d.entries.length} Versionen importiert!`,'success');
+    } catch(err){ toast('Fehler beim Import (ungültiges JSON).','error'); console.error(err); }
+    e.target.value = '';
   };
-  reader.readAsText(file);
+  r.readAsText(file);
 }
 
 function confirmImport(count) {
-  return new Promise((resolve) => {
-    const container = document.getElementById('modal-container');
-    container.innerHTML = `
-      <div class="modal-backdrop" id="modal-backdrop-import">
-        <div class="modal">
-          <h3>Daten importieren?</h3>
-          <p>Die Datei enthält <strong>${count} Versionen</strong>. Bestehende Daten werden überschrieben.</p>
-          <div class="modal-actions">
-            <button class="btn btn-outline" onclick="closeModal(); window.__importResolve(false)">Abbrechen</button>
-            <button class="btn btn-primary" onclick="closeModal(); window.__importResolve(true)">✅ Importieren</button>
-          </div>
+  return new Promise(resolve => {
+    const wrap = document.getElementById('modal-wrap');
+    const bg   = document.createElement('div');
+    bg.className = 'modal-bg';
+    bg.innerHTML = `
+      <div class="modal">
+        <h3>Daten importieren?</h3>
+        <p>Die Datei enthält <strong>${count} Versionen</strong>. Bestehende Daten werden überschrieben.</p>
+        <div class="modal-actions">
+          <button class="btn btn-outline" id="ibtn-no">Abbrechen</button>
+          <button class="btn btn-primary"  id="ibtn-yes">✅ Importieren</button>
         </div>
-      </div>
-    `;
-    window.__importResolve = resolve;
+      </div>`;
+    wrap.innerHTML = ''; wrap.appendChild(bg);
+    bg.querySelector('#ibtn-no').addEventListener('click',  () => { closeModal(); resolve(false); });
+    bg.querySelector('#ibtn-yes').addEventListener('click', () => { closeModal(); resolve(true);  });
   });
 }
 
-/* ============================================================
-   TOAST NOTIFICATIONS
-   ============================================================ */
-function showToast(msg, type = 'info') {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-
-  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-  toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${escHtml(msg)}</span>`;
-  container.appendChild(toast);
-
+/* ── TOAST ── */
+function toast(msg, type='info') {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const ico = {success:'✅',error:'❌',info:'ℹ️'};
+  t.innerHTML = `<span>${ico[type]||'ℹ️'}</span><span>${esc(msg)}</span>`;
+  c.appendChild(t);
   setTimeout(() => {
-    toast.classList.add('removing');
-    toast.addEventListener('animationend', () => toast.remove());
-  }, 3200);
+    t.classList.add('out');
+    t.addEventListener('animationend', () => t.remove(), {once:true});
+  }, 3000);
 }
 
-/* ============================================================
-   KONFETTI
-   ============================================================ */
-function launchConfetti() {
-  const colors = ['#C9A961', '#D4B97A', '#8B6F47', '#4CAF50', '#FF9800', '#F0D898'];
-  const count  = 55;
-
-  for (let i = 0; i < count; i++) {
+/* ── KONFETTI ── */
+function doConfetti() {
+  const cols = ['#C9A961','#D4B97A','#8B6F47','#4CAF50','#FF9800','#F0D898','#fff'];
+  for (let i=0; i<60; i++) {
     setTimeout(() => {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      const size   = Math.random() * 10 + 6;
-      const left   = Math.random() * 100;
-      const duration = Math.random() * 1.5 + 1.8;
-      const color  = colors[Math.floor(Math.random() * colors.length)];
-      const rotation = Math.random() * 360;
-
-      Object.assign(piece.style, {
-        left:      left + 'vw',
-        width:     size + 'px',
-        height:    size + 'px',
-        background: color,
-        animationDuration: duration + 's',
-        animationDelay:    '0s',
-        transform: `rotate(${rotation}deg)`,
-        borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+      const p  = document.createElement('div');
+      p.className = 'cfp';
+      const sz = Math.random()*9+5;
+      const dur = Math.random()*1.4+1.8;
+      Object.assign(p.style,{
+        left: Math.random()*100+'vw', width:sz+'px', height:sz+'px',
+        background: cols[Math.floor(Math.random()*cols.length)],
+        animationDuration: dur+'s',
+        borderRadius: Math.random()>.5?'50%':'2px',
+        transform:`rotate(${Math.random()*360}deg)`
       });
-
-      document.body.appendChild(piece);
-      setTimeout(() => piece.remove(), (duration + 0.2) * 1000);
-    }, i * 30);
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), dur*1000+200);
+    }, i*28);
   }
 }
 
-/* ============================================================
-   HILFSFUNKTIONEN
-   ============================================================ */
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escAttr(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/* ============================================================
-   BOOTSTRAP
-   ============================================================ */
+/* ── INIT ── */
 (async function init() {
   try {
     await loadData();
-    renderAll();
-    // Datum-Default im Form setzen
-    document.getElementById('form-date').value = new Date().toISOString().slice(0, 10);
-    // Initiales Item-Row rendern
-    formItems = [{ category: 'Neu', text: '' }];
-    renderItemRows();
-  } catch (err) {
-    console.error('Init-Fehler:', err);
-    showToast('Fehler beim Initialisieren der App.', 'error');
+    updateHeader();
+    renderFilters();
+    renderEntries();
+    document.getElementById('f-date').value = todayISO();
+    renderRows();
+  } catch(e) {
+    console.error('Init error:', e);
+    toast('Fehler beim Initialisieren.','error');
   } finally {
-    // Loading Overlay ausblenden
-    const overlay = document.getElementById('loading-overlay');
-    overlay.style.transition = 'opacity 0.4s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 450);
+    const ov = document.getElementById('loading');
+    ov.style.transition = 'opacity .35s ease';
+    ov.style.opacity    = '0';
+    setTimeout(() => ov.remove(), 400);
   }
 })();
 </script>
