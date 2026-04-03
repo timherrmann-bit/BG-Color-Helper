@@ -933,7 +933,7 @@ function renderEntries() {
     card.className = 'v-card';
     card.innerHTML = `
       <div class="v-card-head">
-        <div><div class="v-tag">${hl(esc(entry.version),q)}</div><div class="v-date">${fmtDate(entry.date)}</div></div>
+        <div><div class="v-tag">${hl(esc(entry.version),q)} - NN-Theme </div><div class="v-date">${fmtDate(entry.date)}</div></div>
         <div class="v-card-actions">
           <button class="btn btn-outline btn-sm" data-edit="${eA(entry.version)}">✏️ Bearbeiten</button>
           <button class="btn btn-danger btn-sm"  data-del="${eA(entry.version)}">🗑</button>
