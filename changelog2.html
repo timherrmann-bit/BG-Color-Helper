@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Changelog – Naughty Nuts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --cream:       #FBF5EC;
+  --cream-dark:  #F2E8D9;
+  --gold:        #C9A961;
+  --gold-light:  #D4B97A;
+  --gold-dark:   #A88840;
+  --brown:       #8B6F47;
+  --brown-dark:  #5C4730;
+  --brown-light: #B08B61;
+  --text:        #2C1F0E;
+  --text-muted:  #7A6348;
+  --border:      #DDD0BC;
+  --shadow:      rgba(139,111,71,0.15);
+  --radius:      12px;
+  --radius-sm:   8px;
+  --radius-lg:   18px;
+  --tr:          0.2s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* ── HEADER ── */
+#app-header{background:linear-gradient(135deg,var(--brown-dark) 0%,var(--brown) 60%,var(--brown-light) 100%);position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(44,31,14,.25)}
+.header-inner{max-width:920px;margin:0 auto;padding:18px 24px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.header-brand{flex:1;min-width:180px}
+.header-brand h1{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--cream);line-height:1.2}
+.version-badge{display:inline-block;background:rgba(201,169,97,.3);border:1px solid var(--gold-light);color:var(--gold-light);font-size:.75rem;font-weight:600;padding:2px 10px;border-radius:20px;margin-top:4px;letter-spacing:.04em}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;border:none;transition:all var(--tr);text-decoration:none;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--gold);color:var(--brown-dark);font-weight:600}
+.btn-primary:hover{background:var(--gold-light);box-shadow:0 4px 16px rgba(201,169,97,.4)}
+.btn-ghost{background:rgba(255,255,255,.12);color:var(--cream);border:1px solid rgba(255,255,255,.2)}
+.btn-ghost:hover{background:rgba(255,255,255,.22)}
+.btn-outline{background:transparent;color:var(--brown);border:1.5px solid var(--border)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold-dark);background:rgba(201,169,97,.06)}
+.btn-danger{background:transparent;color:#c0392b;border:1.5px solid #e8b0ab}
+.btn-danger:hover{background:#fdf0f0;border-color:#F44336}
+.btn-success{background:#4CAF50;color:#fff}
+.btn-success:hover{background:#43a047;box-shadow:0 4px 14px rgba(76,175,80,.3)}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+
+/* ── MAIN ── */
+#main{max-width:920px;margin:0 auto;padding:28px 24px 80px}
+
+/* ── SEARCH ── */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+.search-input{width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:#fff;color:var(--text);transition:border var(--tr),box-shadow var(--tr)}
+.search-input::placeholder{color:var(--text-muted)}
+.search-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,97,.18)}
+
+/* ── FILTER CHIPS ── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center}
+.filter-label{font-size:.78rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:.78rem;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all var(--tr);user-select:none}
+.chip input{display:none}
+.chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.chip[data-cat="Neu"]             {border-color:#a8d5a9;background:#f0faf0;color:#2e7d32}
+.chip[data-cat="Geändert"]        {border-color:#90c4f5;background:#e8f4fd;color:#1565c0}
+.chip[data-cat="Fixes"]           {border-color:#ffcc80;background:#fff8e1;color:#e65100}
+.chip[data-cat="Breaking Changes"]{border-color:#ef9a9a;background:#fff5f5;color:#b71c1c}
+.chip[data-cat="Known Issues"]    {border-color:#e0e0e0;background:#f5f5f5;color:#424242}
+.chip.off{opacity:.38}
+
+/* ── FORM PANEL ── */
+#form-panel{display:none;margin-bottom:28px;animation:slideDown .25s ease both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.form-card{background:#fff;border:2px solid var(--gold);border-radius:var(--radius-lg);padding:24px 26px 22px;box-shadow:0 6px 28px rgba(139,111,71,.13)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.panel-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown-dark);display:flex;align-items:center;gap:8px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:540px){.form-row{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:5px}
+label.fld{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+input[type="text"],input[type="date"],select{padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--text);background:var(--cream);transition:border var(--tr),box-shadow var(--tr)}
+input[type="text"]:focus,input[type="date"]:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,97,.2);background:#fff}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath fill='%238B6F47' d='M0.5 0.5l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:32px}
+
+/* ── ITEMS EDITOR ── */
+.items-editor{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.item-row{display:flex;gap:8px;align-items:center;background:var(--cream);border-radius:var(--radius-sm);padding:7px 9px;border:1px solid var(--border);animation:rowIn .18s ease both}
+@keyframes rowIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}
+.item-row select{flex:0 0 155px}
+.item-row input{flex:1;min-width:0}
+.btn-rm{flex-shrink:0;width:32px;height:32px;border-radius:6px;background:#fff;border:1.5px solid #e8b0ab;color:#c0392b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all var(--tr);padding:0;font-family:inherit}
+.btn-rm:hover{background:#fdf0f0}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;padding-top:4px}
+
+/* ── VERSION CARDS ── */
+.entries-list{display:flex;flex-direction:column;gap:18px}
+.v-card{background:#fff;border-radius:var(--radius-lg);border:1.5px solid var(--border);overflow:hidden;transition:box-shadow var(--tr),transform var(--tr);animation:cardIn .28s ease both}
+.v-card:hover{box-shadow:0 8px 32px var(--shadow);transform:translateY(-2px)}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.v-card-head{display:flex;align-items:center;gap:12px;padding:16px 20px 14px;background:linear-gradient(135deg,var(--cream-dark),var(--cream));border-bottom:1px solid var(--border);flex-wrap:wrap}
+.v-tag{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--brown-dark);letter-spacing:-.02em}
+.v-date{font-size:.8rem;color:var(--text-muted)}
+.v-card-actions{margin-left:auto;display:flex;gap:6px}
+.v-card-body{padding:16px 20px 18px}
+.cat-block+.cat-block{margin-top:12px}
+.cat-label{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 9px;border-radius:20px;margin-bottom:7px}
+.cat-dot{width:6px;height:6px;border-radius:50%}
+.item-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.item-list li{font-size:.88rem;padding:4px 0 4px 16px;position:relative;border-bottom:1px dashed rgba(0,0,0,.05)}
+.item-list li:last-child{border-bottom:none}
+.item-list li::before{content:'';position:absolute;left:3px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state .icon{font-size:2.8rem;margin-bottom:10px}
+.empty-state p{font-size:1rem;margin-bottom:5px;color:var(--text)}
+.empty-state small{font-size:.83rem}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(44,31,14,.5);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .2s ease;padding:20px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:var(--radius-lg);padding:30px;max-width:400px;width:100%;box-shadow:0 24px 60px rgba(44,31,14,.2);animation:modalIn .28s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes modalIn{from{opacity:0;transform:scale(.93) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--brown-dark);margin-bottom:8px}
+.modal p{color:var(--text-muted);font-size:.88rem;margin-bottom:22px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:24px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--brown-dark);color:var(--cream);padding:11px 18px;border-radius:var(--radius);font-size:.86rem;font-weight:500;box-shadow:0 8px 28px rgba(44,31,14,.28);animation:tIn .3s cubic-bezier(.175,.885,.32,1.275) both;display:flex;align-items:center;gap:9px;pointer-events:all;max-width:300px}
+.toast.success{border-left:4px solid #4CAF50}
+.toast.error  {border-left:4px solid #F44336}
+.toast.info   {border-left:4px solid var(--gold)}
+@keyframes tIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tOut{to{opacity:0;transform:translateX(24px);max-height:0;padding:0;margin:0}}
+.toast.out{animation:tOut .28s ease forwards}
+
+/* ── CONFETTI ── */
+.cfp{position:fixed;top:-12px;pointer-events:none;z-index:9999;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:12px}
+.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:sp .65s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading p{color:var(--text-muted);font-size:.88rem}
+
+/* ── HIGHLIGHT ── */
+mark.hl{background:rgba(201,169,97,.28);border-radius:2px;padding:0 1px;color:inherit}
+
+/* ── PASSWORD SCREEN ── */
+#pw-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--brown-dark) 0%,var(--brown) 55%,var(--brown-light) 100%);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px}
+.pw-box{background:var(--cream);border-radius:var(--radius-lg);padding:42px 38px 36px;max-width:420px;width:100%;box-shadow:0 32px 80px rgba(44,31,14,.4);text-align:center;animation:modalIn .38s cubic-bezier(.175,.885,.32,1.275)}
+.pw-logo{font-size:2.8rem;margin-bottom:8px;line-height:1}
+.pw-box h2{font-family:'Playfair Display',serif;font-size:1.55rem;color:var(--brown-dark);margin-bottom:6px}
+.pw-box p{font-size:.85rem;color:var(--text-muted);margin-bottom:28px;line-height:1.5}
+.pw-lock-icon{font-size:1rem;margin-right:4px}
+.pw-input-wrap{position:relative;margin-bottom:6px}
+.pw-input{width:100%;padding:13px 46px 13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:1.05rem;color:var(--text);background:#fff;transition:border var(--tr),box-shadow var(--tr);text-align:center;letter-spacing:.12em}
+.pw-input::placeholder{letter-spacing:normal;color:var(--text-muted)}
+.pw-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,97,.22)}
+.pw-input.err{border-color:#F44336;box-shadow:0 0 0 3px rgba(244,67,54,.15)}
+.pw-input.shake{animation:shake .38s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.15rem;padding:6px;line-height:1;transition:color var(--tr)}
+.pw-toggle:hover{color:var(--brown)}
+.pw-error{font-size:.82rem;color:#c0392b;min-height:20px;margin:6px 0 14px;font-weight:500;text-align:center}
+.pw-remember{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:22px;font-size:.84rem;color:var(--text-muted);cursor:pointer;user-select:none}
+.pw-remember input{width:15px;height:15px;cursor:pointer;accent-color:var(--gold)}
+.pw-btn{width:100%;padding:13px;background:var(--gold);color:var(--brown-dark);border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all var(--tr);letter-spacing:.02em}
+.pw-btn:hover{background:var(--gold-light);box-shadow:0 4px 18px rgba(201,169,97,.45)}
+.pw-btn:active{transform:scale(.98)}
+.pw-enc-badge{margin-top:20px;font-size:.74rem;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:5px;opacity:.7}
+
+@media(max-width:600px){
+  .header-inner{padding:14px 16px;gap:10px}
+  .header-brand h1{font-size:1.2rem}
+  #main{padding:18px 14px 60px}
+  .v-card-head{padding:12px 15px}
+  .v-card-body{padding:12px 15px 15px}
+  .form-card{padding:18px 14px}
+  .item-row{flex-wrap:wrap}
+  .item-row select{flex:1 1 100%}
+  .pw-box{padding:32px 22px 28px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── PASSWORT-SCREEN ── -->
+<div id="pw-screen">
+  <div class="pw-box">
+    <div class="pw-logo">🥜</div>
+    <h2>Naughty Nuts</h2>
+    <p><span class="pw-lock-icon">🔐</span>Changelog ist verschlüsselt.<br>Bitte Passwort eingeben.</p>
+    <div class="pw-input-wrap">
+      <input type="password" class="pw-input" id="pw-input"
+        placeholder="Passwort eingeben…"
+        onkeydown="if(event.key==='Enter') submitPw()"
+        autocomplete="current-password" />
+      <button class="pw-toggle" id="pw-toggle" onclick="toggleVis()" title="Anzeigen/Verbergen">👁</button>
+    </div>
+    <div class="pw-error" id="pw-error"></div>
+    <label class="pw-remember">
+      <input type="checkbox" id="pw-remember" checked />
+      Angemeldet bleiben (in diesem Browser)
+    </label>
+    <button class="pw-btn" onclick="submitPw()">Entsperren →</button>
+    <div class="pw-enc-badge"></div>
+  </div>
+</div>
+
+<!-- ── LOADING ── -->
+<div id="loading"><div class="spin"></div><p>Entschlüssle Daten…</p></div>
+
+<!-- ── HEADER ── -->
+<header id="app-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <h1 id="hdr-theme">🥜 Naughty Nuts – Changelog</h1>
+      <div class="version-badge" id="hdr-ver">v1.1.2</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary btn-sm" onclick="openForm(null)">➕ Neue Version</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportData()">⬇ Export</button>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+        ⬆ Import
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)" />
+      </label>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main id="main">
+  <div class="search-bar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" class="search-input" id="search-input" placeholder="Nach Version oder Änderung suchen…" oninput="onSearch()" />
+    </div>
+  </div>
+  <div class="filter-bar" id="filter-bar"></div>
+
+  <!-- Inline Formular -->
+  <div id="form-panel">
+    <div class="form-card">
+      <div class="panel-head">
+        <div class="panel-title" id="panel-title"><span>➕</span> Neue Version hinzufügen</div>
+        <button class="btn btn-outline btn-sm" onclick="closeForm()">✕ Schließen</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="fld" for="f-version">Version *</label>
+          <input type="text" id="f-version" placeholder="z.B. 1.1.3" />
+        </div>
+        <div class="form-group">
+          <label class="fld" for="f-date">Datum *</label>
+          <input type="date" id="f-date" />
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="fld">Einträge</label>
+        <div class="items-editor" id="items-editor"></div>
+        <button class="btn btn-outline btn-sm" onclick="addRow()" style="align-self:flex-start;margin-top:8px">➕ Weiterer Eintrag</button>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-success" onclick="saveVersion()">💾 Speichern</button>
+        <button class="btn btn-outline" onclick="closeForm()">✕ Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="entries-list" id="entries-list"></div>
+</main>
+
+<div id="toasts"></div>
+<div id="modal-wrap"></div>
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ────────────────────────────────────────────────────────────────
+   KRYPTO-SCHICHT  (AES-256-GCM + PBKDF2)
+   ────────────────────────────────────────────────────────────────
+   Läuft über file://, http:// und https://.
+   crypto.subtle ist in modernen Browsern auch auf file:// verfügbar
+   (Chrome, Edge, Safari). Firefox blockiert es auf file:// –
+   dort zeigen wir einen klaren Hinweis.
+   ──────────────────────────────────────────────────────────────── */
+
+const PBKDF2_ITER  = 310_000;
+const PBKDF2_HASH  = 'SHA-256';
+
+/* Prüfen ob WebCrypto verfügbar ist */
+function cryptoAvailable() {
+  return typeof crypto !== 'undefined' && crypto.subtle != null;
+}
+
+/* ArrayBuffer ↔ Base64 */
+const toB64   = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const fromB64 = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer;
+
+/* PBKDF2 → AES-256-GCM Key */
+async function deriveKey(password, saltBuf) {
+  const enc    = new TextEncoder();
+  const keyMat = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt: saltBuf, iterations: PBKDF2_ITER, hash: PBKDF2_HASH },
+    keyMat,
+    { name:'AES-GCM', length:256 },
+    false,
+    ['encrypt','decrypt']
+  );
+}
+
+/* Verschlüsseln → JSON-String (salt+iv+ciphertext als Base64) */
+async function encryptData(plaintext, password) {
+  const saltBuf = crypto.getRandomValues(new Uint8Array(16));
+  const ivBuf   = crypto.getRandomValues(new Uint8Array(12));
+  const key     = await deriveKey(password, saltBuf);
+  const ct      = await crypto.subtle.encrypt({name:'AES-GCM', iv: ivBuf}, key, new TextEncoder().encode(plaintext));
+  return JSON.stringify({ v:1, s: toB64(saltBuf), i: toB64(ivBuf), c: toB64(ct) });
+}
+
+/* Entschlüsseln → Klartext, wirft bei falschem Passwort */
+async function decryptData(stored, password) {
+  const { s, i, c } = JSON.parse(stored);
+  const saltBuf = fromB64(s);
+  const ivBuf   = fromB64(i);
+  const ctBuf   = fromB64(c);
+  const key     = await deriveKey(password, saltBuf);
+  const plain   = await crypto.subtle.decrypt({name:'AES-GCM', iv: ivBuf}, key, ctBuf);
+  return new TextDecoder().decode(plain);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   APP-ZUSTAND
+   ──────────────────────────────────────────────────────────────── */
+const STORAGE_KEY  = 'nn_cl_enc';
+const REMEMBER_KEY = 'nn_cl_rem';
+
+const MASTER_HASH  = '8a716490c059482076fee5e4e7cd927eab5ff19db8adc41ac265856b65bd7aaf';
+
+/* SHA-256 eines Strings → Hex */
+async function sha256hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* Prüfen ob ein Passwort das Master-Passwort ist (Hash-Vergleich) */
+async function isMasterPw(pw) {
+  const h = await sha256hex(pw);
+  return h === MASTER_HASH;
+}
+const CATS   = ['Neu','Geändert','Fixes','Breaking Changes','Known Issues'];
+const CAT_COL= {'Neu':'#4CAF50','Geändert':'#2196F3','Fixes':'#FF9800','Breaking Changes':'#F44336','Known Issues':'#9E9E9E'};
+const CAT_BG = {'Neu':'#e8f5e9','Geändert':'#e3f2fd','Fixes':'#fff3e0','Breaking Changes':'#ffebee','Known Issues':'#f5f5f5'};
+const CAT_FG = {'Neu':'#2e7d32','Geändert':'#1565c0','Fixes':'#e65100','Breaking Changes':'#b71c1c','Known Issues':'#424242'};
+
+const INITIAL_DATA = {
+  theme:'Naughty Nuts Theme', currentVersion:'1.1.2',
+  entries:[
+    { version:'1.1.2', date:'2026-04-02', items:[
+      {category:'Geändert',     text:'Sticky Add-to-Cart Mobile optimiert – Z-Index und Touch-Feedback verbessert'},
+      {category:'Fixes',        text:'Farbkontrast CTA-Buttons auf WCAG AA angehoben (Ratio 4.8:1)'},
+      {category:'Fixes',        text:'Meta Pixel Sandbox-Warnung in Browser-Konsole behoben'},
+      {category:'Known Issues', text:'iOS Safari: Sticky Header bei schnellem Scroll gelegentlich flackernd'},
+    ]},
+    { version:'1.1.1', date:'2026-03-18', items:[
+      {category:'Neu',      text:'Mix & Save Bundle-Tool: Dynamische Rabatt-Badges nach Tier-Level'},
+      {category:'Neu',      text:'Discount-Code wird automatisch via /checkout?discount= übergeben'},
+      {category:'Geändert', text:'Variant-Selection Modal: Mobile Sticky Bottom Bar implementiert'},
+      {category:'Fixes',    text:'Cart-Submit via /cart/add.js mit line_item_properties korrigiert'},
+    ]},
+    { version:'1.1.0', date:'2026-03-05', items:[
+      {category:'Neu',              text:'Category Button Slider Section: Horizontales Scrollen mit Snap + Pfeil-Navigation'},
+      {category:'Neu',              text:'Media Grid Section: Per-Block Row-Height Override eingebaut'},
+      {category:'Neu',              text:'Bio-Zertifizierungs-Badge DE-ÖKO-006 im Footer integriert'},
+      {category:'Geändert',         text:'Email-Templates auf Warm-Design-System migriert (Beige/Braun/Gold)'},
+      {category:'Breaking Changes', text:'Knofedt-Font muss manuell in Theme-Assets hochgeladen sein'},
+    ]},
+    { version:'1.0.5', date:'2026-02-12', items:[
+      {category:'Neu',      text:'DSGVO/Cookie-Compliance-Audit abgeschlossen, WCAG A/AA-Fixes umgesetzt'},
+      {category:'Geändert', text:'Make (Integromat) Automation: Tally → Google Sheets → Shopify Influencer-Flow'},
+      {category:'Fixes',    text:'Web Pixel Sandbox Fehler bei Consent-Mode V2 behoben'},
+      {category:'Fixes',    text:'Focus-Styles für alle interaktiven Elemente nachgerüstet'},
+    ]},
+  ]
+};
+
+let activePassword  = null;   // Passwort im RAM – nie persistent
+let entries         = [];
+let theme           = 'Naughty Nuts Theme';
+let currentVersion  = '1.1.2';
+let activeFilters   = new Set(CATS);
+let searchQ         = '';
+let editingVersion  = null;
+let formRows        = [{category:'Neu', text:''}];
+
+/* ────────────────────────────────────────────────────────────────
+   PASSWORT-SCREEN
+   ─────────────────────────────────────────────────────────────────
+   "Angemeldet bleiben": Das Passwort wird AES-256-verschlüsselt
+   mit einem gerätespezifischen Key in localStorage gesichert.
+   Ohne korrektes Passwort öffnet sich die App nie — auch nicht
+   bei gespeicherter Session.
+   ──────────────────────────────────────────────────────────────── */
+
+// Gerätespezifischer Schlüssel-Salt (kein Geheimnis, nur Bindung ans Gerät)
+function getDeviceSalt() {
+  let s = localStorage.getItem('nn_dsalt');
+  if (!s) {
+    s = toB64(crypto.getRandomValues(new Uint8Array(16)));
+    localStorage.setItem('nn_dsalt', s);
+  }
+  return s;
+}
+
+// Passwort verschlüsselt im localStorage ablegen
+async function saveRememberPw(pw) {
+  const salt     = fromB64(getDeviceSalt());
+  const enc      = await encryptData(pw, toB64(salt) + 'remember');
+  localStorage.setItem(REMEMBER_KEY, enc);
+}
+
+// Gespeichertes Passwort entschlüsseln und zurückgeben (oder null)
+async function loadRememberPw() {
+  const stored = localStorage.getItem(REMEMBER_KEY);
+  if (!stored) return null;
+  try {
+    const salt = fromB64(getDeviceSalt());
+    return await decryptData(stored, toB64(salt) + 'remember');
+  } catch(e) {
+    return null;
+  }
+}
+
+function toggleVis() {
+  const inp = document.getElementById('pw-input');
+  const btn = document.getElementById('pw-toggle');
+  inp.type        = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+  inp.focus();
+}
+
+async function submitPw() {
+  const pw      = document.getElementById('pw-input').value;
+  const remember= document.getElementById('pw-remember').checked;
+  const errEl   = document.getElementById('pw-error');
+  const inp     = document.getElementById('pw-input');
+
+  if (!pw) { errEl.textContent = 'Bitte Passwort eingeben.'; return; }
+
+  // WebCrypto-Check (Firefox blockiert crypto.subtle auf file://)
+  if (!cryptoAvailable()) {
+    errEl.textContent = '⚠️ Bitte öffne die Datei über einen lokalen Webserver oder Chrome/Edge (nicht Firefox auf file://).';
+    return;
+  }
+
+  errEl.textContent = '';
+  inp.disabled = true;
+  document.querySelector('.pw-btn').textContent = 'Prüfe…';
+
+  try {
+    const unlocked = await attemptUnlock(pw);
+
+    if (unlocked) {
+      // Master-PW nie im Remember-Me speichern
+      const master = await isMasterPw(pw);
+      if (remember && !master) await saveRememberPw(pw);
+      else if (!master)        localStorage.removeItem(REMEMBER_KEY);
+      hidePwScreen();
+      bootApp();
+    } else {
+      errEl.textContent = '❌ Falsches Passwort.';
+      inp.classList.remove('shake');
+      void inp.offsetWidth;
+      inp.classList.add('shake');
+      inp.classList.add('err');
+      setTimeout(() => inp.classList.remove('err'), 600);
+      inp.disabled = false;
+      inp.value    = '';
+      inp.focus();
+      document.querySelector('.pw-btn').textContent = 'Entsperren →';
+    }
+  } catch(e) {
+    // Unerwarteter Fehler — Input immer wieder freischalten
+    console.error('submitPw error:', e);
+    errEl.textContent = '⚠️ Fehler: ' + (e.message || 'Unbekannt');
+    inp.disabled = false;
+    document.querySelector('.pw-btn').textContent = 'Entsperren →';
+  }
+}
+
+// Kernfunktion: Passwort prüfen durch Entschlüsselung der echten Daten.
+// Master-PW: kann immer entsperren — legt Daten neu an wenn nötig.
+// Gibt true/false zurück, befüllt bei Erfolg den App-State.
+async function attemptUnlock(pw) {
+  const master = await isMasterPw(pw);
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        // Normaler Entschlüsselungsversuch mit eingegebenem Passwort
+        const plain = await decryptData(stored, pw);
+        const data  = JSON.parse(plain);
+        entries        = data.entries        || [];
+        theme          = data.theme          || theme;
+        currentVersion = data.currentVersion || currentVersion;
+      } catch(decryptErr) {
+        // Entschlüsselung fehlgeschlagen
+        if (master) {
+          // Master-PW: Daten existieren aber wurden mit anderem PW verschlüsselt.
+          // → Daten gehen verloren wenn kein anderes PW bekannt. Hier: leere DB anlegen.
+          // In der Praxis sollte das nie passieren wenn Master-PW nicht als User-PW genutzt wird.
+          entries        = INITIAL_DATA.entries;
+          theme          = INITIAL_DATA.theme;
+          currentVersion = INITIAL_DATA.currentVersion;
+          await persistWithPassword(pw);
+        } else {
+          return false; // Normales falsches Passwort
+        }
+      }
+    } else {
+      // Keine Daten vorhanden → Initialdaten mit diesem Passwort verschlüsseln
+      entries        = INITIAL_DATA.entries;
+      theme          = INITIAL_DATA.theme;
+      currentVersion = INITIAL_DATA.currentVersion;
+      await persistWithPassword(pw);
+    }
+    activePassword = pw;
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+function hidePwScreen() {
+  const sc = document.getElementById('pw-screen');
+  sc.style.transition = 'opacity .3s ease';
+  sc.style.opacity    = '0';
+  setTimeout(() => sc.remove(), 320);
+}
+
+// "Angemeldet bleiben": gespeichertes Passwort laden und echte Entschlüsselung prüfen
+async function tryRememberLogin() {
+  const savedPw = await loadRememberPw();
+  if (!savedPw) return false;
+  // Das gespeicherte Passwort MUSS die echten Daten entschlüsseln können
+  // → kein Bypass möglich
+  return await attemptUnlock(savedPw);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DATEN SPEICHERN (immer verschlüsselt)
+   ──────────────────────────────────────────────────────────────── */
+async function persistWithPassword(pw) {
+  const plain = JSON.stringify({ theme, currentVersion, entries });
+  const enc   = await encryptData(plain, pw);
+  localStorage.setItem(STORAGE_KEY, enc);
+}
+
+async function persist() {
+  if (!activePassword) { toast('Kein aktives Passwort – bitte neu laden.','error'); return; }
+  await persistWithPassword(activePassword);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   HELPERS
+   ──────────────────────────────────────────────────────────────── */
+function esc(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function eA(s)    { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function eR(s)    { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){ if(!iso)return'–'; try{ const[y,m,d]=iso.split('-'); return `${d}.${m}.${y}`; } catch(e){ return iso; } }
+function hl(text,q){ if(!q)return text; return text.replace(new RegExp(`(${eR(q)})`,'gi'),'<mark class="hl">$1</mark>'); }
+function cmpVer(a,b){ const pa=a.split('.').map(n=>parseInt(n)||0),pb=b.split('.').map(n=>parseInt(n)||0); for(let i=0;i<Math.max(pa.length,pb.length);i++){const d=(pa[i]||0)-(pb[i]||0);if(d!==0)return d;}return 0; }
+
+/* ────────────────────────────────────────────────────────────────
+   APP BOOTEN (nach erfolgreichem Login)
+   ──────────────────────────────────────────────────────────────── */
+function bootApp() {
+  updateHeader();
+  renderFilters();
+  renderEntries();
+  document.getElementById('f-date').value = todayISO();
+  renderRows();
+  // Loading verstecken
+  const ov = document.getElementById('loading');
+  ov.style.transition = 'opacity .3s ease';
+  ov.style.opacity    = '0';
+  setTimeout(() => ov.remove(), 350);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   RENDER
+   ──────────────────────────────────────────────────────────────── */
+function updateHeader() {
+  document.getElementById('hdr-theme').textContent = '🥜 ' + theme + ' – Changelog';
+  document.getElementById('hdr-ver').textContent   = 'v' + currentVersion;
+}
+
+function renderFilters() {
+  const bar = document.getElementById('filter-bar');
+  bar.innerHTML = '<span class="filter-label">Filter:</span>';
+  CATS.forEach(cat => {
+    const on = activeFilters.has(cat);
+    const el = document.createElement('label');
+    el.className   = `chip${on?'':' off'}`;
+    el.dataset.cat = cat;
+    el.innerHTML   = `<input type="checkbox"${on?' checked':''}/><span class="chip-dot" style="background:${CAT_COL[cat]}"></span>${esc(cat)}`;
+    el.addEventListener('change', () => {
+      if (activeFilters.has(cat)) activeFilters.delete(cat); else activeFilters.add(cat);
+      renderFilters(); renderEntries();
+    });
+    bar.appendChild(el);
+  });
+}
+
+function getVisible() {
+  const q = searchQ.toLowerCase();
+  return entries
+    .filter(e => {
+      if (q) { const mv=e.version.toLowerCase().includes(q),mi=e.items.some(i=>i.text.toLowerCase().includes(q)||i.category.toLowerCase().includes(q)); if(!mv&&!mi)return false; }
+      return e.items.some(i => activeFilters.has(i.category));
+    })
+    .sort((a,b)=>{ const d=cmpVer(b.version,a.version); return d!==0?d:b.date.localeCompare(a.date); });
+}
+
+function renderEntries() {
+  const list = document.getElementById('entries-list');
+  const vis  = getVisible();
+  const q    = searchQ.toLowerCase();
+  if (!vis.length) { list.innerHTML=`<div class="empty-state"><div class="icon">🔍</div><p>Keine Einträge gefunden</p><small>Passe Suche oder Filter an</small></div>`; return; }
+  list.innerHTML = '';
+  vis.forEach(entry => {
+    const visible = entry.items.filter(i=>activeFilters.has(i.category));
+    const bycat   = {};
+    visible.forEach(i=>{ if(!bycat[i.category]) bycat[i.category]=[]; bycat[i.category].push(i); });
+    let catsHtml  = '';
+    CATS.forEach(cat => {
+      if (!bycat[cat]) return;
+      catsHtml += `<div class="cat-block"><div class="cat-label" style="background:${CAT_BG[cat]};color:${CAT_FG[cat]}"><span class="cat-dot" style="background:${CAT_COL[cat]}"></span>${esc(cat)}</div><ul class="item-list">${bycat[cat].map(i=>`<li>${hl(esc(i.text),q)}</li>`).join('')}</ul></div>`;
+    });
+    const card = document.createElement('div');
+    card.className = 'v-card';
+    card.innerHTML = `
+      <div class="v-card-head">
+        <div><div class="v-tag">v${hl(esc(entry.version),q)}</div><div class="v-date">${fmtDate(entry.date)}</div></div>
+        <div class="v-card-actions">
+          <button class="btn btn-outline btn-sm" data-edit="${eA(entry.version)}">✏️ Bearbeiten</button>
+          <button class="btn btn-danger btn-sm"  data-del="${eA(entry.version)}">🗑</button>
+        </div>
+      </div>
+      <div class="v-card-body">${catsHtml}</div>`;
+    card.querySelector('[data-edit]').addEventListener('click', () => openForm(entry.version));
+    card.querySelector('[data-del]').addEventListener('click',  () => confirmDelete(entry.version));
+    list.appendChild(card);
+  });
+}
+
+function onSearch() { searchQ = document.getElementById('search-input').value.trim(); renderEntries(); }
+
+/* ────────────────────────────────────────────────────────────────
+   FORMULAR
+   ──────────────────────────────────────────────────────────────── */
+function syncFromDOM() {
+  document.querySelectorAll('#items-editor .item-row').forEach((row,idx) => {
+    const sel=row.querySelector('select'), inp=row.querySelector('input[type="text"]');
+    if(sel&&inp&&formRows[idx]!==undefined){ formRows[idx].category=sel.value; formRows[idx].text=inp.value; }
+  });
+}
+
+function renderRows() {
+  const editor = document.getElementById('items-editor');
+  editor.innerHTML = '';
+  formRows.forEach((item,idx) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    const sel = document.createElement('select');
+    CATS.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; if(c===item.category) o.selected=true; sel.appendChild(o); });
+    const inp = document.createElement('input');
+    inp.type='text'; inp.placeholder='Änderung beschreiben…'; inp.value=item.text;
+    inp.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); syncFromDOM(); addRow(); } });
+    const rm = document.createElement('button');
+    rm.type='button'; rm.className='btn-rm'; rm.title='Entfernen'; rm.textContent='✕';
+    rm.addEventListener('click', () => { syncFromDOM(); formRows.splice(idx,1); if(!formRows.length) formRows=[{category:'Neu',text:''}]; renderRows(); });
+    row.appendChild(sel); row.appendChild(inp); row.appendChild(rm);
+    editor.appendChild(row);
+  });
+}
+
+function addRow() { syncFromDOM(); formRows.push({category:'Neu',text:''}); renderRows(); const inputs=document.querySelectorAll('#items-editor input[type="text"]'); if(inputs.length) inputs[inputs.length-1].focus(); }
+
+function openForm(version) {
+  editingVersion = version;
+  const panel = document.getElementById('form-panel');
+  if (version !== null) {
+    const entry = entries.find(e=>e.version===version);
+    if (!entry) { toast('Version nicht gefunden.','error'); return; }
+    document.getElementById('panel-title').innerHTML = `<span>✏️</span> Bearbeiten: <strong>v${esc(version)}</strong>`;
+    document.getElementById('f-version').value = entry.version;
+    document.getElementById('f-date').value    = entry.date;
+    formRows = entry.items.map(i=>({...i}));
+  } else {
+    document.getElementById('panel-title').innerHTML = '<span>➕</span> Neue Version hinzufügen';
+    document.getElementById('f-version').value = '';
+    document.getElementById('f-date').value    = todayISO();
+    formRows = [{category:'Neu',text:''}];
+  }
+  renderRows();
+  panel.style.display = 'block';
+  setTimeout(() => panel.scrollIntoView({behavior:'smooth',block:'start'}), 30);
+}
+
+function closeForm() {
+  document.getElementById('form-panel').style.display = 'none';
+  editingVersion = null;
+  formRows = [{category:'Neu',text:''}];
+}
+
+async function saveVersion() {
+  syncFromDOM();
+  const version = document.getElementById('f-version').value.trim();
+  const date    = document.getElementById('f-date').value.trim();
+  if (!version)                        { toast('Bitte eine Version eingeben.','error'); return; }
+  if (!/^\d+(\.\d+)*$/.test(version)) { toast('Format ungültig – z.B. 1.2.3','error'); return; }
+  if (!date)                           { toast('Bitte ein Datum wählen.','error'); return; }
+  const items = formRows.map(r=>({category:r.category,text:r.text.trim()})).filter(r=>r.text.length>0);
+  if (!items.length) { toast('Mindestens einen Eintrag hinzufügen.','error'); return; }
+  if (editingVersion !== null) {
+    const idx = entries.findIndex(e=>e.version===editingVersion);
+    if (idx!==-1) entries[idx]={version,date,items}; else entries.push({version,date,items});
+  } else {
+    if (entries.find(e=>e.version===version)) { toast(`Version ${version} existiert bereits.`,'error'); return; }
+    entries.unshift({version,date,items});
+  }
+  const sorted = [...entries].sort((a,b)=>cmpVer(b.version,a.version));
+  currentVersion = sorted[0]?.version || version;
+  await persist();
+  updateHeader(); renderEntries(); closeForm();
+  toast(`Version ${version} gespeichert! 🎉`,'success');
+  doConfetti();
+}
+
+/* ────────────────────────────────────────────────────────────────
+   LÖSCHEN
+   ──────────────────────────────────────────────────────────────── */
+function confirmDelete(version) {
+  const wrap=document.getElementById('modal-wrap'), bg=document.createElement('div');
+  bg.className='modal-bg'; bg.id='mbg';
+  bg.innerHTML=`<div class="modal"><h3>Version löschen?</h3><p>Willst du <strong>v${esc(version)}</strong> wirklich löschen? Nicht rückgängig zu machen.</p><div class="modal-actions"><button class="btn btn-outline" id="mbtn-cancel">Abbrechen</button><button class="btn btn-danger" id="mbtn-del">🗑 Löschen</button></div></div>`;
+  wrap.innerHTML=''; wrap.appendChild(bg);
+  bg.addEventListener('click',e=>{ if(e.target===bg)closeModal(); });
+  bg.querySelector('#mbtn-cancel').addEventListener('click',closeModal);
+  bg.querySelector('#mbtn-del').addEventListener('click',()=>doDelete(version));
+}
+function closeModal(){ document.getElementById('modal-wrap').innerHTML=''; }
+async function doDelete(version) {
+  entries=entries.filter(e=>e.version!==version);
+  const sorted=[...entries].sort((a,b)=>cmpVer(b.version,a.version));
+  currentVersion=sorted[0]?.version||'–';
+  await persist(); closeModal(); updateHeader(); renderEntries();
+  toast(`Version ${version} gelöscht.`,'info');
+}
+
+/* ────────────────────────────────────────────────────────────────
+   EXPORT / IMPORT  (Klartext-JSON für Backup)
+   ──────────────────────────────────────────────────────────────── */
+function exportData() {
+  const d={theme,currentVersion,entries,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=Object.assign(document.createElement('a'),{href:url,download:`changelog-${todayISO()}.json`});
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('Export erfolgreich!','success');
+}
+
+function importData(e) {
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=async ev=>{
+    try {
+      const d=JSON.parse(ev.target.result);
+      if(!Array.isArray(d.entries)){toast('Ungültiges Format.','error');return;}
+      const ok=await confirmImport(d.entries.length);
+      if(!ok)return;
+      entries=d.entries; theme=d.theme||theme; currentVersion=d.currentVersion||currentVersion;
+      await persist(); updateHeader(); renderFilters(); renderEntries();
+      toast(`${d.entries.length} Versionen importiert!`,'success');
+    } catch(err){toast('Fehler beim Import.','error');console.error(err);}
+    e.target.value='';
+  };
+  r.readAsText(file);
+}
+
+function confirmImport(count) {
+  return new Promise(resolve=>{
+    const wrap=document.getElementById('modal-wrap'),bg=document.createElement('div');
+    bg.className='modal-bg';
+    bg.innerHTML=`<div class="modal"><h3>Daten importieren?</h3><p>Die Datei enthält <strong>${count} Versionen</strong>. Bestehende Daten werden überschrieben.</p><div class="modal-actions"><button class="btn btn-outline" id="ibtn-no">Abbrechen</button><button class="btn btn-primary" id="ibtn-yes">✅ Importieren</button></div></div>`;
+    wrap.innerHTML=''; wrap.appendChild(bg);
+    bg.querySelector('#ibtn-no').addEventListener('click',()=>{closeModal();resolve(false);});
+    bg.querySelector('#ibtn-yes').addEventListener('click',()=>{closeModal();resolve(true);});
+  });
+}
+
+/* ────────────────────────────────────────────────────────────────
+   TOAST & KONFETTI
+   ──────────────────────────────────────────────────────────────── */
+function toast(msg,type='info'){
+  const c=document.getElementById('toasts'),t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${{success:'✅',error:'❌',info:'ℹ️'}[type]||'ℹ️'}</span><span>${esc(msg)}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{ t.classList.add('out'); t.addEventListener('animationend',()=>t.remove(),{once:true}); },3000);
+}
+function doConfetti(){
+  const cols=['#C9A961','#D4B97A','#8B6F47','#4CAF50','#FF9800','#F0D898','#fff'];
+  for(let i=0;i<60;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div'); p.className='cfp';
+      const dur=Math.random()*1.4+1.8;
+      Object.assign(p.style,{left:Math.random()*100+'vw',width:(Math.random()*9+5)+'px',height:(Math.random()*9+5)+'px',background:cols[Math.floor(Math.random()*cols.length)],animationDuration:dur+'s',borderRadius:Math.random()>.5?'50%':'2px',transform:`rotate(${Math.random()*360}deg)`});
+      document.body.appendChild(p); setTimeout(()=>p.remove(),dur*1000+200);
+    },i*28);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────────────────────────── */
+(async function init(){
+  const ov = document.getElementById('loading');
+
+  // Wenn WebCrypto nicht verfügbar: direkt PW-Screen zeigen mit Hinweis
+  if (!cryptoAvailable()) {
+    ov.style.transition='opacity .3s ease'; ov.style.opacity='0';
+    setTimeout(()=>ov.remove(),350);
+    setTimeout(()=>{
+      const errEl = document.getElementById('pw-error');
+      if (errEl) errEl.textContent = '⚠️ Bitte in Chrome, Edge oder Safari öffnen (nicht Firefox auf file://).';
+      document.getElementById('pw-input')?.focus();
+    }, 400);
+    return;
+  }
+
+  // Auto-Login versuchen (Remember-Me)
+  const autoOk = await tryRememberLogin();
+  if (autoOk) {
+    bootApp();
+  } else {
+    ov.style.transition='opacity .3s ease'; ov.style.opacity='0';
+    setTimeout(()=>ov.remove(),350);
+    setTimeout(()=>document.getElementById('pw-input')?.focus(), 400);
+  }
+})();
+</script>
+</body>
+</html>
