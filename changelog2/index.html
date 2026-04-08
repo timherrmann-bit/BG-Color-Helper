@@ -512,7 +512,7 @@ const MIN_PASSWORD_LENGTH = 10;
 const GITHUB_OWNER = 'timherrmann-nn';
 const GITHUB_REPO = 'Workaround-Helper';
 const GITHUB_BRANCH = 'main';
-const GITHUB_WORKFLOW_ID = 'update-changelog-database.yml';
+const GITHUB_DATABASE_PATH = 'changelog2/database.json';
 const AUTO_SYNC_INTERVAL_MS = 30 * 60 * 1000;
 
 /* SHA-256 eines Strings → Hex */
@@ -919,28 +919,18 @@ function hasUnsyncedChanges() {
   return JSON.stringify(getDatabasePayload()) !== JSON.stringify(normalizeData(seedData));
 }
 
-async function dispatchGitHubDatabaseWorkflow() {
-  const token = getGitHubToken();
-  if (!token) throw new Error('Bitte zuerst einen GitHub-Token in den Einstellungen hinterlegen.');
-
-  const payload = getDatabasePayload();
-  const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`, {
-    method: 'POST',
+async function githubRequest(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
     headers: {
       'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      ref: GITHUB_BRANCH,
-      inputs: {
-        database_json: JSON.stringify(payload, null, 2)
-      }
-    })
+      'Authorization': `Bearer ${getGitHubToken()}`,
+      ...(options.headers || {})
+    }
   });
 
   if (!response.ok) {
-    let message = `GitHub-Workflow konnte nicht gestartet werden (${response.status}).`;
+    let message = `GitHub-Request fehlgeschlagen (${response.status}).`;
     try {
       const errorData = await response.json();
       if (errorData?.message) message = `${message} ${errorData.message}`;
@@ -949,6 +939,40 @@ async function dispatchGitHubDatabaseWorkflow() {
     }
     throw new Error(message);
   }
+
+  return response;
+}
+
+async function pushDatabaseToGitHub() {
+  const token = getGitHubToken();
+  if (!token) throw new Error('Bitte zuerst einen GitHub-Token in den Einstellungen hinterlegen.');
+
+  const payload = getDatabasePayload();
+  const contentUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_DATABASE_PATH}`;
+  let sha = null;
+
+  try {
+    const getResponse = await githubRequest(`${contentUrl}?ref=${encodeURIComponent(GITHUB_BRANCH)}`);
+    const currentFile = await getResponse.json();
+    sha = currentFile.sha || null;
+  } catch (error) {
+    if (!String(error.message || '').includes('(404)')) throw error;
+  }
+
+  const body = {
+    message: `Update ${GITHUB_DATABASE_PATH}`,
+    content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
+    branch: GITHUB_BRANCH
+  };
+  if (sha) body.sha = sha;
+
+  await githubRequest(contentUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
 
   seedData = cloneData(payload);
 }
@@ -965,10 +989,10 @@ async function syncDatabaseToGitHub(options = {}) {
 
   syncInFlight = true;
   try {
-    await dispatchGitHubDatabaseWorkflow();
+    await pushDatabaseToGitHub();
     pendingGitHubSync = false;
     if (showSuccessToast) {
-      toast('Repo-Sync erfolgreich gestartet. GitHub erstellt jetzt den Commit.','success');
+      toast('Repo-Sync erfolgreich. database.json wurde direkt aktualisiert.','success');
     }
     return true;
   } catch (error) {
@@ -1220,10 +1244,10 @@ function openSettings() {
     <div class="modal">
       <h3>Einstellungen</h3>
       <p>Hier verwaltest du dein lokales Passwort und den GitHub-Zugang fuer globale Updates.</p>
-      <div class="modal-note">Der GitHub-Token bleibt nur in dieser Browser-Sitzung gespeichert. Er sollte nur Rechte fuer Actions auf diesem Repo haben.</div>
+      <div class="modal-note">Der GitHub-Token bleibt nur in dieser Browser-Sitzung gespeichert. Er sollte nur Rechte fuer Contents auf diesem Repo haben.</div>
       <div class="form-group">
         <label class="fld" for="settings-gh-token">GitHub Token</label>
-        <input type="password" id="settings-gh-token" placeholder="Fine-grained Token mit Actions: Write" autocomplete="off" />
+        <input type="password" id="settings-gh-token" placeholder="Fine-grained Token mit Contents: Read and write" autocomplete="off" />
       </div>
       <div class="modal-note">${hasGitHubToken() ? 'GitHub-Token ist fuer diese Sitzung gesetzt.' : 'Noch kein GitHub-Token hinterlegt.'}</div>
       <div class="modal-actions" style="margin-bottom:16px">
