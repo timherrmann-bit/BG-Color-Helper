@@ -474,7 +474,7 @@
         </div>
 
         <div class="hint">
-          Die Vorschau läuft lokal im Browser. Für den MP4-Export wird FFmpeg im Browser geladen. Große Videos oder lange Clips brauchen entsprechend Zeit und RAM. Beim ersten Start ist eine Internetverbindung nötig, solange FFmpeg vom CDN geladen wird.
+          Die Vorschau läuft lokal im Browser. Für den MP4-Export wird FFmpeg direkt aus diesem Projekt geladen. Große Videos oder lange Clips brauchen entsprechend Zeit und RAM.
         </div>
 
         <div id="status" class="status"></div>
@@ -522,8 +522,7 @@
   </div>
 
   <script type="module">
-    import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js';
-    import { fetchFile, toBlobURL } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js';
+    import { FFmpeg } from './vendor/ffmpeg/index.js';
 
     const ratios = [
       { label: '1:1', value: 1 },
@@ -603,6 +602,21 @@
       statusEl.textContent = message;
       statusEl.className = 'status';
       if (type) statusEl.classList.add(type);
+    }
+
+    function getLocalhostHint() {
+      return 'Bitte nicht direkt per Datei öffnen. Starte das Tool über http://localhost, z. B. mit "python3 -m http.server 8000" im Projektordner und öffne dann http://localhost:8000/video-crop/.';
+    }
+
+    async function fetchFileData(file) {
+      if (file instanceof Uint8Array) return file;
+      if (file instanceof ArrayBuffer) return new Uint8Array(file);
+      if (file instanceof Blob) return new Uint8Array(await file.arrayBuffer());
+      throw new Error('Die Eingabedatei konnte nicht gelesen werden.');
+    }
+
+    function getAssetUrl(relativePath) {
+      return new URL(relativePath, window.location.href).toString();
     }
 
     function formatTime(seconds) {
@@ -866,6 +880,10 @@
     async function getFFmpeg() {
       if (state.ffmpegLoaded && state.ffmpeg) return state.ffmpeg;
 
+      if (window.location.protocol === 'file:') {
+        throw new Error(getLocalhostHint());
+      }
+
       setStatus('FFmpeg wird geladen ...');
       progressWrap.classList.remove('hidden');
       progressBar.style.width = '8%';
@@ -883,11 +901,9 @@
         }
       });
 
-      const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
-        workerURL: await toBlobURL(`${base}/ffmpeg-core.worker.js`, 'text/javascript')
+        coreURL: getAssetUrl('./vendor/core/ffmpeg-core.js'),
+        wasmURL: getAssetUrl('./vendor/core/ffmpeg-core.wasm')
       });
 
       state.ffmpeg = ffmpeg;
@@ -944,7 +960,7 @@
         const inputName = `input-${Date.now()}.${safeInputExt}`;
         const outputName = `output-${Date.now()}.mp4`;
 
-        await ffmpeg.writeFile(inputName, await fetchFile(state.file));
+        await ffmpeg.writeFile(inputName, await fetchFileData(state.file));
         const args = buildExportArgs(inputName, outputName);
         await ffmpeg.exec(args);
         const data = await ffmpeg.readFile(outputName);
@@ -972,7 +988,11 @@
         try { await ffmpeg.deleteFile(outputName); } catch {}
       } catch (error) {
         console.error(error);
-        setStatus(`Export fehlgeschlagen: ${error?.message || error}`, 'error');
+        const message = String(error?.message || error || 'Unbekannter Fehler');
+        const isWorkerOriginError =
+          /origin 'null'|Failed to construct 'Worker'|cannot be accessed from origin 'null'/i.test(message);
+        const finalMessage = isWorkerOriginError ? getLocalhostHint() : `Export fehlgeschlagen: ${message}`;
+        setStatus(finalMessage, 'error');
       } finally {
         state.exporting = false;
         exportBtn.disabled = false;
@@ -1202,6 +1222,9 @@
     updateZoomLabel();
     updateQualityLabel();
     toggleLockBtn.textContent = 'Verhältnis gesperrt';
+    if (window.location.protocol === 'file:') {
+      setStatus(getLocalhostHint(), 'error');
+    }
     refreshInfo();
     enableControls(false);
   </script>

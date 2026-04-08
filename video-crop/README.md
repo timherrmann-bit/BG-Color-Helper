@@ -5,9 +5,15 @@ Die Seite liegt unter [index.html](/Users/tim-nn/Documents/GitHub/Workaround-Hel
 ## Was gebraucht wird
 
 - Ein aktueller Browser wie Chrome, Edge oder Safari.
-- Eine normale HTTP(S)-Auslieferung, zum Beispiel GitHub Pages oder ein lokaler Webserver.
-- Internetzugriff beim Laden der Seite, weil FFmpeg aktuell von `jsdelivr` geladen wird.
+- Eine normale HTTP(S)-Auslieferung, zum Beispiel GitHub Pages oder ein lokaler Webserver. Direktes Oeffnen per `file://` reicht nicht.
 - Genug Arbeitsspeicher und CPU, da das komplette Video im Browser verarbeitet wird.
+- Die lokalen FFmpeg-Dateien im Ordner [video-crop/vendor](/Users/tim-nn/Documents/GitHub/Workaround-Helper/video-crop/vendor).
+
+## Lokal starten
+
+- Im Projektordner ausfuehren: `python3 -m http.server 8000`
+- Danach im Browser oeffnen: `http://localhost:8000/video-crop/`
+- Alternativ die Datei [start-local.command](/Users/tim-nn/Documents/GitHub/Workaround-Helper/video-crop/start-local.command) verwenden.
 
 ## Was bereits funktioniert
 
@@ -20,10 +26,10 @@ Die Seite liegt unter [index.html](/Users/tim-nn/Documents/GitHub/Workaround-Hel
 
 - Sehr große oder hochaufloesende Videos koennen im Browser langsam sein oder fehlschlagen.
 - Welche Eingabeformate wirklich aufgehen, haengt auch davon ab, was der jeweilige Browser dekodieren kann.
-- Wenn das Tool komplett offline funktionieren soll, muessen die FFmpeg-Dateien lokal ins Projekt gelegt statt per CDN geladen werden.
+- Das Tool ist jetzt nicht mehr vom CDN-Import fuer `@ffmpeg/ffmpeg` abhaengig. Entscheidend ist nur noch, dass es ueber `http://localhost` oder eine normale Website-URL geladen wird.
 
 ## Empfehlung fuer echten Einsatz
 
 - Seite ueber GitHub Pages oder einen kleinen lokalen Server starten.
 - Ein paar Testdateien pruefen: `mp4/h264`, `mov`, `hevc/iphone`, mit und ohne Audio.
-- Falls gewuenscht, im naechsten Schritt lokale FFmpeg-Assets und eine klarere Fehleranzeige ergaenzen.
+- Falls gewuenscht, im naechsten Schritt koennen wir noch Fortschritt, bessere Fehlertexte und weitere Exportprofile ergaenzen.
