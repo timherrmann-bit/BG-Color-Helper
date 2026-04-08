@@ -513,6 +513,7 @@ const GITHUB_OWNER = 'timherrmann-nn';
 const GITHUB_REPO = 'Workaround-Helper';
 const GITHUB_BRANCH = 'main';
 const GITHUB_WORKFLOW_ID = 'update-changelog-database.yml';
+const AUTO_SYNC_INTERVAL_MS = 30 * 60 * 1000;
 
 /* SHA-256 eines Strings → Hex */
 async function sha256hex(str) {
@@ -561,6 +562,9 @@ let searchQ         = '';
 let editingVersion  = null;
 let formRows        = [{category:'Neu', text:''}];
 let pwMode          = 'unlock';
+let pendingGitHubSync = false;
+let syncInFlight = false;
+let autoSyncTimer = null;
 
 function cloneInitialEntries() {
   return cloneData(seedData).entries;
@@ -911,6 +915,10 @@ function getDatabasePayload() {
   });
 }
 
+function hasUnsyncedChanges() {
+  return JSON.stringify(getDatabasePayload()) !== JSON.stringify(normalizeData(seedData));
+}
+
 async function dispatchGitHubDatabaseWorkflow() {
   const token = getGitHubToken();
   if (!token) throw new Error('Bitte zuerst einen GitHub-Token in den Einstellungen hinterlegen.');
@@ -945,10 +953,49 @@ async function dispatchGitHubDatabaseWorkflow() {
   seedData = cloneData(payload);
 }
 
+async function syncDatabaseToGitHub(options = {}) {
+  const { showSuccessToast = false, showMissingTokenToast = false } = options;
+  if (!pendingGitHubSync || syncInFlight) return false;
+  if (!hasGitHubToken()) {
+    if (showMissingTokenToast) {
+      toast('Lokal gespeichert. Fuer den Repo-Sync bitte zuerst einen GitHub-Token hinterlegen.','info');
+    }
+    return false;
+  }
+
+  syncInFlight = true;
+  try {
+    await dispatchGitHubDatabaseWorkflow();
+    pendingGitHubSync = false;
+    if (showSuccessToast) {
+      toast('Repo-Sync erfolgreich gestartet. GitHub erstellt jetzt den Commit.','success');
+    }
+    return true;
+  } catch (error) {
+    console.error('syncDatabaseToGitHub error:', error);
+    toast(error.message || 'Repo-Sync fehlgeschlagen. Daten bleiben lokal gespeichert.','error');
+    return false;
+  } finally {
+    syncInFlight = false;
+  }
+}
+
+function queueGitHubSync(options = {}) {
+  pendingGitHubSync = true;
+  void syncDatabaseToGitHub(options);
+}
+
+function startAutoSync() {
+  if (autoSyncTimer) clearInterval(autoSyncTimer);
+  autoSyncTimer = window.setInterval(() => {
+    if (pendingGitHubSync) void syncDatabaseToGitHub();
+  }, AUTO_SYNC_INTERVAL_MS);
+}
+
 async function persist() {
   if (!activePassword) { toast('Kein aktives Passwort – bitte neu laden.','error'); return; }
   await persistWithPassword(activePassword);
-  await dispatchGitHubDatabaseWorkflow();
+  pendingGitHubSync = true;
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -966,14 +1013,17 @@ function cmpVer(a,b){ const pa=a.split('.').map(n=>parseInt(n)||0),pb=b.split('.
    APP BOOTEN (nach erfolgreichem Login)
    ──────────────────────────────────────────────────────────────── */
 function bootApp() {
-  entries = cloneInitialEntries();
-  theme = seedData.theme;
-  currentVersion = seedData.currentVersion;
+  pendingGitHubSync = hasUnsyncedChanges();
   updateHeader();
   renderFilters();
   renderEntries();
   document.getElementById('f-date').value = todayISO();
   renderRows();
+  startAutoSync();
+  window.addEventListener('online', () => { if (pendingGitHubSync) void syncDatabaseToGitHub(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && pendingGitHubSync) void syncDatabaseToGitHub();
+  });
   // Loading verstecken
   const ov = document.getElementById('loading');
   ov.style.transition = 'opacity .3s ease';
@@ -1136,7 +1186,8 @@ async function saveVersion() {
   try {
     await persist();
     updateHeader(); renderEntries(); closeForm();
-    toast(`Version ${version} gespeichert. GitHub-Commit wurde angestossen.`,'success');
+    toast(`Version ${version} lokal gespeichert.`,'success');
+    queueGitHubSync({ showMissingTokenToast: true });
     doConfetti();
   } catch (error) {
     entries = previousEntries;
@@ -1227,6 +1278,7 @@ function submitGitHubToken() {
   saveGitHubToken(token);
   errorEl.textContent = '';
   toast('GitHub-Token fuer diese Sitzung gespeichert.','success');
+  if (pendingGitHubSync) void syncDatabaseToGitHub({ showSuccessToast: true });
 }
 
 function clearGitHubToken() {
@@ -1278,7 +1330,8 @@ async function doDelete(version) {
   try {
     await persist();
     closeModal(); updateHeader(); renderEntries();
-    toast(`Version ${version} geloescht. GitHub-Commit wurde angestossen.`,'info');
+    toast(`Version ${version} lokal geloescht.`,'info');
+    queueGitHubSync({ showMissingTokenToast: true });
   } catch (error) {
     entries = previousEntries;
     currentVersion = previousCurrentVersion;
@@ -1313,7 +1366,8 @@ function importData(e) {
       if(!ok)return;
       entries=d.entries; theme=d.theme||theme; currentVersion=d.currentVersion||currentVersion;
       await persist(); updateHeader(); renderFilters(); renderEntries();
-      toast(`${d.entries.length} Versionen importiert. GitHub-Commit wurde angestossen.`,'success');
+      toast(`${d.entries.length} Versionen lokal importiert.`,'success');
+      queueGitHubSync({ showMissingTokenToast: true });
     } catch(err){
       entries = previousData.entries;
       theme = previousData.theme;
