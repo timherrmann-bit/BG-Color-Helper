@@ -1,0 +1,57 @@
+name: Update Changelog Database
+
+on:
+  workflow_dispatch:
+    inputs:
+      database_json:
+        description: Serialized JSON payload for changelog2/database.json
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate payload
+        env:
+          DATABASE_JSON: ${{ inputs.database_json }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+
+          raw = os.environ["DATABASE_JSON"]
+          data = json.loads(raw)
+
+          if not isinstance(data, dict):
+              raise SystemExit("database_json must decode to an object")
+
+          if not isinstance(data.get("entries"), list):
+              raise SystemExit("database_json.entries must be an array")
+          PY
+
+      - name: Write database.json
+        env:
+          DATABASE_JSON: ${{ inputs.database_json }}
+        run: |
+          printf '%s\n' "$DATABASE_JSON" > changelog2/database.json
+
+      - name: Commit updated database
+        run: |
+          if git diff --quiet -- changelog2/database.json; then
+            echo "No database changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add changelog2/database.json
+          git commit -m "Update changelog database"
+          git push

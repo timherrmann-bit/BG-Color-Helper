@@ -415,6 +415,10 @@ mark.hl{background:rgba(216,111,74,.18);border-radius:6px;padding:0 3px;color:in
           <input type="date" id="f-date" />
         </div>
       </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="fld" for="f-headline">Headline</label>
+        <input type="text" id="f-headline" placeholder="z.B. Header + Menü Anpassung" />
+      </div>
       <div class="form-group" style="margin-bottom:12px">
         <label class="fld">Einträge</label>
         <div class="items-editor" id="items-editor"></div>
@@ -501,9 +505,14 @@ async function decryptData(stored, password) {
 const STORAGE_KEY  = 'nn_cl_enc';
 const REMEMBER_KEY = 'nn_cl_rem';
 const MASTER_WRAP_KEY = 'nn_cl_master_wrap';
+const GITHUB_TOKEN_KEY = 'nn_cl_github_token';
 const MASTER_PASSWORD = 'NN-2026#';
 const LEGACY_MASTER_HASH = '8a716490c059482076fee5e4e7cd927eab5ff19db8adc41ac265856b65bd7aaf';
 const MIN_PASSWORD_LENGTH = 10;
+const GITHUB_OWNER = 'timherrmann-nn';
+const GITHUB_REPO = 'Workaround-Helper';
+const GITHUB_BRANCH = 'main';
+const GITHUB_WORKFLOW_ID = 'update-changelog-database.yml';
 
 /* SHA-256 eines Strings → Hex */
 async function sha256hex(str) {
@@ -524,32 +533,19 @@ const CAT_FG = {'Neu':'#2e7d32','Geändert':'#1565c0','Fixes':'#e65100','Breakin
 const SHARED_DB_URL = './database.json';
 
 const FALLBACK_DATA = {
-  theme:'Naughty Nuts Theme', currentVersion:'1.1.2',
+  theme:'Naughty Nuts Theme', currentVersion:'1.3.0',
   entries:[
-    { version:'1.1.2', date:'2026-04-02', items:[
-      {category:'Geändert',     text:'Sticky Add-to-Cart Mobile optimiert – Z-Index und Touch-Feedback verbessert'},
-      {category:'Fixes',        text:'Farbkontrast CTA-Buttons auf WCAG AA angehoben (Ratio 4.8:1)'},
-      {category:'Fixes',        text:'Meta Pixel Sandbox-Warnung in Browser-Konsole behoben'},
-      {category:'Known Issues', text:'iOS Safari: Sticky Header bei schnellem Scroll gelegentlich flackernd'},
+    { version:'1.3.0', date:'2026-04-07', items:[
+      {category:'Neu',          text:'Bullet Points in Meta Objektives hinzugefuegt + Custom Liquid auf PDP'},
+      {category:'Geändert',     text:'Navigation Top Slider mit IMG anpassung'},
+      {category:'Fixes',        text:'Navigation Slider Center Fix - war nicht am Desktop zentriert'},
+      {category:'Fixes',        text:'Gallery Badge Anzeige Bis -10% gefixt - war nicht klar genug definiert'},
+      {category:'Fixes',        text:'Variant Show - Rabatt Badge hinzugefuegt + Bug Fix'},
     ]},
-    { version:'1.1.1', date:'2026-03-18', items:[
-      {category:'Neu',      text:'Mix & Save Bundle-Tool: Dynamische Rabatt-Badges nach Tier-Level'},
-      {category:'Neu',      text:'Discount-Code wird automatisch via /checkout?discount= übergeben'},
-      {category:'Geändert', text:'Variant-Selection Modal: Mobile Sticky Bottom Bar implementiert'},
-      {category:'Fixes',    text:'Cart-Submit via /cart/add.js mit line_item_properties korrigiert'},
-    ]},
-    { version:'1.1.0', date:'2026-03-05', items:[
-      {category:'Neu',              text:'Category Button Slider Section: Horizontales Scrollen mit Snap + Pfeil-Navigation'},
-      {category:'Neu',              text:'Media Grid Section: Per-Block Row-Height Override eingebaut'},
-      {category:'Neu',              text:'Bio-Zertifizierungs-Badge DE-ÖKO-006 im Footer integriert'},
-      {category:'Geändert',         text:'Email-Templates auf Warm-Design-System migriert (Beige/Braun/Gold)'},
-      {category:'Breaking Changes', text:'Knofedt-Font muss manuell in Theme-Assets hochgeladen sein'},
-    ]},
-    { version:'1.0.5', date:'2026-02-12', items:[
-      {category:'Neu',      text:'DSGVO/Cookie-Compliance-Audit abgeschlossen, WCAG A/AA-Fixes umgesetzt'},
-      {category:'Geändert', text:'Make (Integromat) Automation: Tally → Google Sheets → Shopify Influencer-Flow'},
-      {category:'Fixes',    text:'Web Pixel Sandbox Fehler bei Consent-Mode V2 behoben'},
-      {category:'Fixes',    text:'Focus-Styles für alle interaktiven Elemente nachgerüstet'},
+    { version:'1.2.3', date:'2026-04-02', items:[
+      {category:'Geändert', text:'Matcha Creme PDP Update - Release Planning Page'},
+      {category:'Geändert', text:'Bundle Claude Code Fix - Stabilitaet'},
+      {category:'Neu',      text:'Variant Picker 6er Optional ausblenden - Vorarbeit fuer 8er Varianten'},
     ]},
   ]
 };
@@ -578,6 +574,7 @@ function cloneData(data) {
       ? data.entries.map(entry => ({
           version: entry.version,
           date: entry.date,
+          headline: entry.headline || '',
           items: Array.isArray(entry.items)
             ? entry.items.map(item => ({ category: item.category, text: item.text }))
             : []
@@ -664,6 +661,19 @@ async function loadUserPwForMaster() {
 
 function hasRememberedSession() {
   return Boolean(localStorage.getItem(REMEMBER_KEY));
+}
+
+function getGitHubToken() {
+  return sessionStorage.getItem(GITHUB_TOKEN_KEY) || '';
+}
+
+function hasGitHubToken() {
+  return Boolean(getGitHubToken());
+}
+
+function saveGitHubToken(token) {
+  if (token) sessionStorage.setItem(GITHUB_TOKEN_KEY, token);
+  else sessionStorage.removeItem(GITHUB_TOKEN_KEY);
 }
 
 function toggleVis(inputId='pw-input', buttonId='pw-toggle') {
@@ -889,9 +899,56 @@ async function persistWithPassword(pw) {
   localStorage.setItem(STORAGE_KEY, enc);
 }
 
+function getDatabasePayload() {
+  const sortedEntries = [...entries].sort((a,b) => {
+    const versionDiff = cmpVer(b.version, a.version);
+    return versionDiff !== 0 ? versionDiff : String(b.date || '').localeCompare(String(a.date || ''));
+  });
+  return normalizeData({
+    theme,
+    currentVersion: sortedEntries[0]?.version || currentVersion,
+    entries: sortedEntries
+  });
+}
+
+async function dispatchGitHubDatabaseWorkflow() {
+  const token = getGitHubToken();
+  if (!token) throw new Error('Bitte zuerst einen GitHub-Token in den Einstellungen hinterlegen.');
+
+  const payload = getDatabasePayload();
+  const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/vnd.github+json',
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      ref: GITHUB_BRANCH,
+      inputs: {
+        database_json: JSON.stringify(payload, null, 2)
+      }
+    })
+  });
+
+  if (!response.ok) {
+    let message = `GitHub-Workflow konnte nicht gestartet werden (${response.status}).`;
+    try {
+      const errorData = await response.json();
+      if (errorData?.message) message = `${message} ${errorData.message}`;
+    } catch (error) {
+      console.warn('GitHub error response parse failed:', error);
+    }
+    throw new Error(message);
+  }
+
+  seedData = cloneData(payload);
+}
+
 async function persist() {
   if (!activePassword) { toast('Kein aktives Passwort – bitte neu laden.','error'); return; }
   await persistWithPassword(activePassword);
+  await dispatchGitHubDatabaseWorkflow();
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -909,6 +966,9 @@ function cmpVer(a,b){ const pa=a.split('.').map(n=>parseInt(n)||0),pb=b.split('.
    APP BOOTEN (nach erfolgreichem Login)
    ──────────────────────────────────────────────────────────────── */
 function bootApp() {
+  entries = cloneInitialEntries();
+  theme = seedData.theme;
+  currentVersion = seedData.currentVersion;
   updateHeader();
   renderFilters();
   renderEntries();
@@ -965,6 +1025,7 @@ function renderEntries() {
   vis.forEach(entry => {
     const visible = entry.items.filter(i=>activeFilters.has(i.category));
     const bycat   = {};
+    const headlineSuffix = entry.headline ? ` - ${hl(esc(entry.headline),q)}` : '';
     visible.forEach(i=>{ if(!bycat[i.category]) bycat[i.category]=[]; bycat[i.category].push(i); });
     let catsHtml  = '';
     CATS.forEach(cat => {
@@ -975,7 +1036,7 @@ function renderEntries() {
     card.className = 'v-card';
     card.innerHTML = `
       <div class="v-card-head">
-        <div><div class="v-tag">${hl(esc(entry.version),q)} - NN-Theme </div><div class="v-date">${fmtDate(entry.date)}</div></div>
+        <div><div class="v-tag">${hl(esc(entry.version),q)} - NN-Theme${headlineSuffix}</div><div class="v-date">${fmtDate(entry.date)}</div></div>
         <div class="v-card-actions">
           <button class="btn btn-outline btn-sm" data-edit="${eA(entry.version)}">✏️ Bearbeiten</button>
           <button class="btn btn-danger btn-sm"  data-del="${eA(entry.version)}">🗑</button>
@@ -1030,11 +1091,13 @@ function openForm(version) {
     document.getElementById('panel-title').innerHTML = `<span>✏️</span> Bearbeiten: <strong>v${esc(version)}</strong>`;
     document.getElementById('f-version').value = entry.version;
     document.getElementById('f-date').value    = entry.date;
+    document.getElementById('f-headline').value = entry.headline || '';
     formRows = entry.items.map(i=>({...i}));
   } else {
     document.getElementById('panel-title').innerHTML = '<span>➕</span> Neue Version hinzufügen';
     document.getElementById('f-version').value = '';
     document.getElementById('f-date').value    = todayISO();
+    document.getElementById('f-headline').value = '';
     formRows = [{category:'Neu',text:''}];
   }
   renderRows();
@@ -1045,13 +1108,17 @@ function openForm(version) {
 function closeForm() {
   document.getElementById('form-panel').style.display = 'none';
   editingVersion = null;
+  document.getElementById('f-headline').value = '';
   formRows = [{category:'Neu',text:''}];
 }
 
 async function saveVersion() {
   syncFromDOM();
+  const previousEntries = cloneData({ theme, currentVersion, entries }).entries;
+  const previousCurrentVersion = currentVersion;
   const version = document.getElementById('f-version').value.trim();
   const date    = document.getElementById('f-date').value.trim();
+  const headline = document.getElementById('f-headline').value.trim();
   if (!version)                        { toast('Bitte eine Version eingeben.','error'); return; }
   if (!/^\d+(\.\d+)*$/.test(version)) { toast('Format ungültig – z.B. 1.2.3','error'); return; }
   if (!date)                           { toast('Bitte ein Datum wählen.','error'); return; }
@@ -1059,17 +1126,25 @@ async function saveVersion() {
   if (!items.length) { toast('Mindestens einen Eintrag hinzufügen.','error'); return; }
   if (editingVersion !== null) {
     const idx = entries.findIndex(e=>e.version===editingVersion);
-    if (idx!==-1) entries[idx]={version,date,items}; else entries.push({version,date,items});
+    if (idx!==-1) entries[idx]={version,date,headline,items}; else entries.push({version,date,headline,items});
   } else {
     if (entries.find(e=>e.version===version)) { toast(`Version ${version} existiert bereits.`,'error'); return; }
-    entries.unshift({version,date,items});
+    entries.unshift({version,date,headline,items});
   }
   const sorted = [...entries].sort((a,b)=>cmpVer(b.version,a.version));
   currentVersion = sorted[0]?.version || version;
-  await persist();
-  updateHeader(); renderEntries(); closeForm();
-  toast(`Version ${version} gespeichert! 🎉`,'success');
-  doConfetti();
+  try {
+    await persist();
+    updateHeader(); renderEntries(); closeForm();
+    toast(`Version ${version} gespeichert. GitHub-Commit wurde angestossen.`,'success');
+    doConfetti();
+  } catch (error) {
+    entries = previousEntries;
+    currentVersion = previousCurrentVersion;
+    updateHeader();
+    renderEntries();
+    toast(error.message || 'Speichern fehlgeschlagen.','error');
+  }
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -1092,7 +1167,19 @@ function openSettings() {
   bg.className = 'modal-bg';
   bg.innerHTML = `
     <div class="modal">
-      <h3>Passwort verwalten</h3>
+      <h3>Einstellungen</h3>
+      <p>Hier verwaltest du dein lokales Passwort und den GitHub-Zugang fuer globale Updates.</p>
+      <div class="modal-note">Der GitHub-Token bleibt nur in dieser Browser-Sitzung gespeichert. Er sollte nur Rechte fuer Actions auf diesem Repo haben.</div>
+      <div class="form-group">
+        <label class="fld" for="settings-gh-token">GitHub Token</label>
+        <input type="password" id="settings-gh-token" placeholder="Fine-grained Token mit Actions: Write" autocomplete="off" />
+      </div>
+      <div class="modal-note">${hasGitHubToken() ? 'GitHub-Token ist fuer diese Sitzung gesetzt.' : 'Noch kein GitHub-Token hinterlegt.'}</div>
+      <div class="modal-actions" style="margin-bottom:16px">
+        <button class="btn btn-outline" id="settings-gh-clear">Token entfernen</button>
+        <button class="btn btn-primary" id="settings-gh-save">GitHub Token speichern</button>
+      </div>
+      <hr style="border:none;border-top:1px solid rgba(216,221,215,.95);margin:0 0 18px" />
       <p>Vergib hier ein neues Nutzerpasswort fur deinen Changelog.</p>
       <div class="modal-note">Das Master-Passwort bleibt unverandert bestehen und wird durch diese Anderung nie uberschrieben.</div>
       <div class="form-group">
@@ -1118,10 +1205,37 @@ function openSettings() {
   bg.addEventListener('click', e => { if (e.target === bg) closeModal(); });
   bg.querySelector('#settings-cancel').addEventListener('click', closeModal);
   bg.querySelector('#settings-save').addEventListener('click', submitPasswordChange);
+  bg.querySelector('#settings-gh-save').addEventListener('click', submitGitHubToken);
+  bg.querySelector('#settings-gh-clear').addEventListener('click', clearGitHubToken);
   bg.querySelector('#settings-confirm-pw').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitPasswordChange();
   });
+  bg.querySelector('#settings-gh-token').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitGitHubToken();
+  });
   bg.querySelector('#settings-new-pw').focus();
+}
+
+function submitGitHubToken() {
+  const token = document.getElementById('settings-gh-token')?.value.trim() || '';
+  const errorEl = document.getElementById('settings-error');
+  if (!errorEl) return;
+  if (!token) {
+    errorEl.textContent = 'Bitte einen GitHub-Token eingeben.';
+    return;
+  }
+  saveGitHubToken(token);
+  errorEl.textContent = '';
+  toast('GitHub-Token fuer diese Sitzung gespeichert.','success');
+}
+
+function clearGitHubToken() {
+  saveGitHubToken('');
+  const tokenInput = document.getElementById('settings-gh-token');
+  const errorEl = document.getElementById('settings-error');
+  if (tokenInput) tokenInput.value = '';
+  if (errorEl) errorEl.textContent = '';
+  toast('GitHub-Token entfernt.','info');
 }
 
 async function submitPasswordChange() {
@@ -1156,11 +1270,23 @@ async function submitPasswordChange() {
 }
 
 async function doDelete(version) {
+  const previousEntries = cloneData({ theme, currentVersion, entries }).entries;
+  const previousCurrentVersion = currentVersion;
   entries=entries.filter(e=>e.version!==version);
   const sorted=[...entries].sort((a,b)=>cmpVer(b.version,a.version));
   currentVersion=sorted[0]?.version||'–';
-  await persist(); closeModal(); updateHeader(); renderEntries();
-  toast(`Version ${version} gelöscht.`,'info');
+  try {
+    await persist();
+    closeModal(); updateHeader(); renderEntries();
+    toast(`Version ${version} geloescht. GitHub-Commit wurde angestossen.`,'info');
+  } catch (error) {
+    entries = previousEntries;
+    currentVersion = previousCurrentVersion;
+    closeModal();
+    updateHeader();
+    renderEntries();
+    toast(error.message || 'Loeschen fehlgeschlagen.','error');
+  }
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -1179,6 +1305,7 @@ function importData(e) {
   const file=e.target.files[0]; if(!file)return;
   const r=new FileReader();
   r.onload=async ev=>{
+    const previousData = cloneData({ theme, currentVersion, entries });
     try {
       const d=JSON.parse(ev.target.result);
       if(!Array.isArray(d.entries)){toast('Ungültiges Format.','error');return;}
@@ -1186,8 +1313,17 @@ function importData(e) {
       if(!ok)return;
       entries=d.entries; theme=d.theme||theme; currentVersion=d.currentVersion||currentVersion;
       await persist(); updateHeader(); renderFilters(); renderEntries();
-      toast(`${d.entries.length} Versionen importiert!`,'success');
-    } catch(err){toast('Fehler beim Import.','error');console.error(err);}
+      toast(`${d.entries.length} Versionen importiert. GitHub-Commit wurde angestossen.`,'success');
+    } catch(err){
+      entries = previousData.entries;
+      theme = previousData.theme;
+      currentVersion = previousData.currentVersion;
+      updateHeader();
+      renderFilters();
+      renderEntries();
+      toast(err.message || 'Fehler beim Import.','error');
+      console.error(err);
+    }
     e.target.value='';
   };
   r.readAsText(file);
