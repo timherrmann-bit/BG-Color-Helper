@@ -5,7 +5,7 @@
     {
       "version": "1.3.0",
       "date": "2026-04-07",
-      "headline": "",
+      "headline": "Test",
       "items": [
         {
           "category": "Neu",
@@ -26,10 +26,6 @@
         {
           "category": "Fixes",
           "text": "Variant Show - Rabatt Badge hinzugefuegt + Bug Fix"
-        },
-        {
-          "category": "Neu",
-          "text": "Test"
         }
       ]
     },
