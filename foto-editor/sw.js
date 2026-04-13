@@ -1,10 +1,11 @@
-const CACHE_NAME = 'foto-editor-v1';
+const CACHE_NAME = 'foto-editor-v2';
 const APP_SHELL = [
-  '/Workaround-Helper/Foto-Editor.html',
-  '/Workaround-Helper/foto-editor.webmanifest',
-  '/Workaround-Helper/Foto-Crop-Editor.png',
-  '/Workaround-Helper/icons/foto-editor-192.png',
-  '/Workaround-Helper/icons/foto-editor-512.png'
+  '/Workaround-Helper/foto-editor/',
+  '/Workaround-Helper/foto-editor/index.html',
+  '/Workaround-Helper/foto-editor/manifest.webmanifest',
+  '/Workaround-Helper/foto-editor/Foto-Crop-Editor2.png',
+  '/Workaround-Helper/foto-editor/icons/foto-editor-192.png',
+  '/Workaround-Helper/foto-editor/icons/foto-editor-512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -44,7 +45,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
           return response;
         })
-        .catch(() => caches.match('/Workaround-Helper/Foto-Editor.html'));
+        .catch(() => caches.match('/Workaround-Helper/foto-editor/index.html'));
     })
   );
 });

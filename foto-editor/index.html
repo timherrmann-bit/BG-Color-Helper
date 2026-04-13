@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="icon" type="image/png" href="./Foto-Crop-Editor.png">
-  <link rel="manifest" href="./foto-editor.webmanifest">
+  <link rel="icon" type="image/png" href="./Foto-Crop-Editor2.png">
+  <link rel="manifest" href="./manifest.webmanifest">
   <meta name="application-name" content="Foto-Editor" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -1035,7 +1035,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./foto-editor-sw.js').catch(() => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {
             setStatus('Service Worker konnte nicht registriert werden. Die Installation als App ist eventuell nicht verfügbar.', true);
           });
         });
@@ -1052,4 +1052,3 @@
   </script>
 </body>
 </html>
-

@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="application-name" content="Video Crop & Cut" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
   <title>Video-Editor MP4</title>
   <style>
     :root {
@@ -113,6 +119,10 @@
       background: #fff;
       color: var(--text);
       border: 1px solid var(--border);
+    }
+
+    .button.install-ready {
+      background: #166534;
     }
 
     .button.ghost {
@@ -391,6 +401,11 @@
         </div>
 
         <div class="field">
+          <button class="button secondary" id="installBtn" type="button">Als App installieren</button>
+          <div class="hint" id="installHint">In Chrome kannst du dieses Tool als App installieren. Wenn der Dialog noch nicht erscheint, lade die Seite nach dem ersten Aufruf einmal neu.</div>
+        </div>
+
+        <div class="field">
           <div class="label-row"><span>Seitenverhältnis</span></div>
           <div class="ratio-grid" id="ratioGrid"></div>
         </div>
@@ -531,6 +546,8 @@
     ];
 
     const fileInput = document.getElementById('fileInput');
+    const installBtn = document.getElementById('installBtn');
+    const installHint = document.getElementById('installHint');
     const ratioGrid = document.getElementById('ratioGrid');
     const zoomRange = document.getElementById('zoomRange');
     const zoomValue = document.getElementById('zoomValue');
@@ -597,6 +614,7 @@
       isUpdatingExportInputs: false,
       raf: null
     };
+    let deferredInstallPrompt = null;
 
     function setStatus(message = '', type = '') {
       statusEl.textContent = message;
@@ -617,6 +635,42 @@
 
     function getAssetUrl(relativePath) {
       return new URL(relativePath, window.location.href).toString();
+    }
+
+    function isStandaloneMode() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    function updateInstallUi() {
+      if (isStandaloneMode()) {
+        installBtn.disabled = true;
+        installBtn.textContent = 'App installiert';
+        installBtn.classList.remove('install-ready');
+        installHint.textContent = 'Die installierte App kannst du direkt aus Chrome oder deinem App-Launcher starten.';
+        return;
+      }
+
+      installBtn.disabled = false;
+
+      if (deferredInstallPrompt) {
+        installBtn.textContent = 'App jetzt installieren';
+        installBtn.classList.add('install-ready');
+        installHint.textContent = 'Chrome hat die App erkannt. Mit einem Klick kannst du sie jetzt installieren.';
+      } else {
+        installBtn.textContent = 'Als App installieren';
+        installBtn.classList.remove('install-ready');
+        installHint.textContent = 'In Chrome kannst du dieses Tool als App installieren. Wenn der Dialog noch nicht erscheint, lade die Seite nach dem ersten Aufruf einmal neu.';
+      }
+    }
+
+    async function registerPwa() {
+      if (!('serviceWorker' in navigator) || window.location.protocol === 'file:') return;
+
+      try {
+        await navigator.serviceWorker.register('./sw.js', { scope: './' });
+      } catch (error) {
+        console.error('Service Worker konnte nicht registriert werden:', error);
+      }
     }
 
     function formatTime(seconds) {
@@ -1147,6 +1201,37 @@
       link.remove();
     });
 
+    installBtn.addEventListener('click', async () => {
+      if (isStandaloneMode()) return;
+
+      if (!deferredInstallPrompt) {
+        setStatus('Wenn Chrome die App-Installation noch nicht anbietet, lade die Seite einmal neu oder nutze das Installieren-Symbol in der Adressleiste.', 'error');
+        return;
+      }
+
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+
+      if (choice?.outcome === 'accepted') {
+        setStatus('Installationsdialog geöffnet.', 'success');
+      }
+
+      deferredInstallPrompt = null;
+      updateInstallUi();
+    });
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      updateInstallUi();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      updateInstallUi();
+      setStatus('Die App wurde installiert.', 'success');
+    });
+
     editorVideo.addEventListener('loadedmetadata', handleMetadataLoaded);
     editorVideo.addEventListener('play', () => {
       cancelAnimationFrame(state.raf);
@@ -1217,6 +1302,7 @@
       refreshInfo();
     });
 
+    registerPwa();
     renderRatioButtons();
     updateCropBox();
     updateZoomLabel();
@@ -1225,6 +1311,7 @@
     if (window.location.protocol === 'file:') {
       setStatus(getLocalhostHint(), 'error');
     }
+    updateInstallUi();
     refreshInfo();
     enableControls(false);
   </script>

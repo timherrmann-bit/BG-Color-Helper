@@ -2,6 +2,13 @@
 
 Die Seite liegt unter [index.html](/Users/tim-nn/Documents/GitHub/Workaround-Helper/video-crop/index.html) und kann Videos lokal im Browser laden, croppen, trimmen und wieder als MP4 ausgeben.
 
+## Als Chrome-App installieren
+
+- Die PWA-Dateien liegen in [manifest.webmanifest](/Users/tim-nn/Documents/GitHub/Workaround-Helper/video-crop/manifest.webmanifest) und [sw.js](/Users/tim-nn/Documents/GitHub/Workaround-Helper/video-crop/sw.js).
+- In Chrome ueber `http://localhost:8000/video-crop/` oder eine veroeffentlichte HTTPS-URL oeffnen.
+- Nach dem ersten Laden die Seite einmal neu laden, falls Chrome den Install-Button noch nicht direkt freigibt.
+- Danach kannst du die App ueber den Button in der Seite oder das Installieren-Symbol in der Chrome-Adressleiste installieren.
+
 ## Was gebraucht wird
 
 - Ein aktueller Browser wie Chrome, Edge oder Safari.
