@@ -1,0 +1,31 @@
+{
+  "id": "/Workaround-Helper/Foto-Editor.html",
+  "name": "Foto-Editor",
+  "short_name": "Foto-Editor",
+  "description": "Lokaler Foto-Editor zum Zuschneiden, Positionieren und Exportieren von Bildern direkt im Browser.",
+  "lang": "de",
+  "dir": "ltr",
+  "start_url": "/Workaround-Helper/Foto-Editor.html",
+  "scope": "/Workaround-Helper/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f6f8",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "/Workaround-Helper/icons/foto-editor-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Workaround-Helper/icons/foto-editor-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/Workaround-Helper/Foto-Crop-Editor.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}

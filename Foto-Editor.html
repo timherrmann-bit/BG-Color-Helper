@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="icon" type="image/png" href="/Workaround-Helper/Foto-Crop-Editor2.png">
+  <link rel="icon" type="image/png" href="./Foto-Crop-Editor.png">
+  <link rel="manifest" href="./foto-editor.webmanifest">
+  <meta name="application-name" content="Foto-Editor" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Foto-Editor" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#111827" />
+  <meta name="description" content="Foto-Editor zum lokalen Zuschneiden, Positionieren und Exportieren von Bildern direkt im Browser." />
   <title>Foto-Editor Zuschneiden</title>
   <style>
     :root {
@@ -1027,6 +1033,14 @@
         setStatus('Die App wurde installiert.');
       });
 
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./foto-editor-sw.js').catch(() => {
+            setStatus('Service Worker konnte nicht registriert werden. Die Installation als App ist eventuell nicht verfügbar.', true);
+          });
+        });
+      }
+
       renderRatioButtons();
       updateCropBox();
       updateZoomLabel();
@@ -1038,5 +1052,4 @@
   </script>
 </body>
 </html>
-
 
