@@ -572,6 +572,7 @@ let pwMode          = 'unlock';
 let firestoreReady  = false;
 let firestoreDocRef = null;
 let seedSource      = 'fallback';
+let firestoreLastError = '';
 
 function cloneInitialEntries() {
   return cloneData(seedData).entries;
@@ -632,7 +633,8 @@ async function loadSharedSeedData() {
 
 async function initFirestore() {
   if (typeof firebase === 'undefined') {
-    console.warn('Firebase SDK nicht geladen.');
+    firestoreLastError = 'Firebase SDK nicht geladen.';
+    console.warn(firestoreLastError);
     return;
   }
 
@@ -643,10 +645,18 @@ async function initFirestore() {
     await auth.signInAnonymously();
     firestoreDocRef = db.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID);
     firestoreReady = true;
+    firestoreLastError = '';
   } catch (error) {
     console.error('Firestore init failed:', error);
     firestoreReady = false;
+    firestoreLastError = error?.message || String(error);
   }
+}
+
+async function ensureFirestoreReady() {
+  if (firestoreReady && firestoreDocRef) return true;
+  await initFirestore();
+  return Boolean(firestoreReady && firestoreDocRef);
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -944,7 +954,10 @@ function getDatabasePayload() {
 }
 
 async function persistToFirestore() {
-  if (!firestoreReady || !firestoreDocRef) return false;
+  const ready = await ensureFirestoreReady();
+  if (!ready) {
+    throw new Error(`Firestore nicht bereit: ${firestoreLastError || 'Unbekannter Fehler'}`);
+  }
   const payload = getDatabasePayload();
   await firestoreDocRef.set({
     ...payload,
@@ -962,7 +975,7 @@ async function persist() {
     return { cloudOk };
   } catch (error) {
     console.error('Firestore persist failed:', error);
-    return { cloudOk: false, cloudError: error };
+    return { cloudOk: false, cloudError: error?.message || String(error) };
   }
 }
 
@@ -1157,7 +1170,7 @@ async function saveVersion() {
     const saveResult = await persist();
     updateHeader(); renderEntries(); closeForm();
     if (saveResult.cloudOk) toast(`Version ${version} gespeichert und mit Firestore synchronisiert.`,'success');
-    else toast(`Version ${version} lokal gespeichert. Firestore-Sync folgt, sobald die Verbindung steht.`,'info');
+    else toast(`Version ${version} lokal gespeichert. Firestore-Fehler: ${saveResult.cloudError || 'Bitte Firebase-Setup pruefen.'}`,'error');
     doConfetti();
   } catch (error) {
     entries = previousEntries;
@@ -1261,7 +1274,7 @@ async function doDelete(version) {
     const saveResult = await persist();
     closeModal(); updateHeader(); renderEntries();
     if (saveResult.cloudOk) toast(`Version ${version} geloescht und mit Firestore synchronisiert.`,'info');
-    else toast(`Version ${version} lokal geloescht. Firestore-Sync folgt, sobald die Verbindung steht.`,'info');
+    else toast(`Version ${version} lokal geloescht. Firestore-Fehler: ${saveResult.cloudError || 'Bitte Firebase-Setup pruefen.'}`,'error');
   } catch (error) {
     entries = previousEntries;
     currentVersion = previousCurrentVersion;
@@ -1297,7 +1310,7 @@ function importData(e) {
       entries=d.entries; theme=d.theme||theme; currentVersion=d.currentVersion||currentVersion;
       const saveResult = await persist(); updateHeader(); renderFilters(); renderEntries();
       if (saveResult.cloudOk) toast(`${d.entries.length} Versionen importiert und mit Firestore synchronisiert.`,'success');
-      else toast(`${d.entries.length} Versionen lokal importiert. Firestore-Sync folgt, sobald die Verbindung steht.`,'info');
+      else toast(`${d.entries.length} Versionen lokal importiert. Firestore-Fehler: ${saveResult.cloudError || 'Bitte Firebase-Setup pruefen.'}`,'error');
     } catch(err){
       entries = previousData.entries;
       theme = previousData.theme;
@@ -1375,6 +1388,10 @@ function doConfetti(){
       document.getElementById('pw-input')?.focus();
     }, 400);
     return;
+  }
+
+  if (location.protocol === 'file:') {
+    console.warn('Firebase unter file:// kann fehlschlagen. Nutze eine http/https URL.');
   }
 
   // Auto-Login versuchen (Remember-Me)
